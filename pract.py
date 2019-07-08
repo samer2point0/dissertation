@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import random
 import queue
 
-def snowball(g, seed, maxsize=20):
+def snowball(g, seed, maxsize=30):
     """this function returns a set of nodes equal to maxsize from g that are
     collected from around seed node via snownball sampling"""
     if g.number_of_nodes() < maxsize:
@@ -20,13 +20,41 @@ def snowball(g, seed, maxsize=20):
                 return subgraph
     return subgraph
 
-def mhla(g, seed, steps=20):
-    G=nx.Graph()
-    G.add_node(seed)
-    new=seed
-    for i in range(0,20):
-        neighbors=G.neighbors(new)
-        temp=random.choice(neighbors) #all edges are equally liekly (no weight on edges)
+def mhda(g, seed, maxsize=30): #nonweighted and undirected edges
+    if g.number_of_nodes() < maxsize:
+        return set()
+    current=seed
+    prev=None
+    subgraph = set(current)
+    while len(subgraph) <= maxsize:
+        neigh=list(g.neighbors(current))
+        temp1=random.choice(neigh)
+        p=random.random()
+        if(p<=min(1,g.degree(current)/g.degree(temp1))):
+            #move to another node if prob>thresh otherwise stay in place (no change to current and prev)
+            if temp1==prev:
+                #try again befor accepting (delay acceptance)
+                if(len(neigh)==1): #if node has only one neighbor which it came from backtrack
+                    temp=prev
+                    prev=current
+                    current=temp
+                    continue
+                neigh.remove(prev)
+                temp2=random.choice(neigh)
+                q=random.random()
+                if q<=min(1,pow(min(1,g.degree(current)/g.degree(temp2))*max(1,g.degree(temp1)/g.degree(current)),2)):
+                    #reject backtracking
+                    prev=current
+                    current=temp2
+                else: #backtrack
+                    prev=current
+                    current=temp1
+            else:
+                #no backtrack so just move
+                prev=current
+                current=temp1
+        subgraph.add(current)
+    return subgraph
 
 
 
@@ -34,10 +62,14 @@ f=open('gr.txt', 'rb')
 G=nx.read_edgelist(f)#, nodetype='int')#, delimiter='\n')
 f.close()
 seed=random.choice(list(G.nodes))
-#sn=snowball(G,seed)
-#snowballG=G.subgraph(sn)
+sn=mhda(G,seed)
+sG=G.subgraph(sn)
+print(sG.nodes)
+nx.draw(sG, with_labels=True)
+plt.show()
 
-sG=mhla(G,seed)
+sn=snowball(G,seed)
+sG=G.subgraph(sn)
 print(sG.nodes)
 nx.draw(sG, with_labels=True)
 plt.show()
