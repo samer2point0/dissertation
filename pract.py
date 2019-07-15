@@ -5,10 +5,18 @@ import queue
 import sampling as smp
 import concept
 
-def prop():
+
+def prop(g):
+    Active=set()
     while target.newNodes:
+        newActive=target.newNodes
+        Active=Active.union(newActive)
+        print(newActive)
         target.update()
-        print(sG.nodes)
+
+
+
+
 f=open('gr.txt', 'rb')
 G=nx.read_edgelist(f)#, nodetype='int')#, delimiter='\n')
 f.close()
@@ -19,12 +27,4 @@ sG=G.subgraph(sn)
 #plt.show()
 
 target=concept.Concept(sG, name='target')
-prop()
-
-"""
-sn=smp.snowball(G)
-sG=G.subgraph(sn)
-print(sG.nodes)
-nx.draw(sG, with_labels=True)
-plt.show()
-"""
+prop(sG)

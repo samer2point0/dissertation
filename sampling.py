@@ -2,7 +2,7 @@ import networkx as nx
 import random
 import queue
 
-def snowball(g, seed=None, maxsize=30):
+def snow(g, seed=None, maxsize=30):
     """this function returns a set of nodes equal to maxsize from g that are
     collected from around seed node via snownball sampling"""
     if seed==None:
@@ -41,6 +41,7 @@ def mhda(g, seed=None, maxsize=30): #nonweighted and undirected edges
                     temp=prev
                     prev=current
                     current=temp
+                    subgraph.add(current)
                     continue
                 neigh.remove(prev)
                 temp2=random.choice(neigh)
