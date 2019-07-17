@@ -2,7 +2,7 @@ import networkx as nx
 import random
 import queue
 
-def snow(g, seed=None, maxsize=30):
+def snow(g, seed=None, maxsize=100):
     """this function returns a set of nodes equal to maxsize from g that are
     collected from around seed node via snownball sampling"""
     if seed==None:
@@ -11,7 +11,7 @@ def snow(g, seed=None, maxsize=30):
         return set()
     q = queue.Queue()
     q.put(seed)
-    subgraph = set(seed)
+    subgraph = set([seed])
     while not q.empty():
         for node in g.neighbors(q.get()):
             if len(subgraph) < maxsize:
@@ -19,16 +19,17 @@ def snow(g, seed=None, maxsize=30):
                 subgraph.add(node)
             else :
                 return subgraph
+
     return subgraph
 
-def mhda(g, seed=None, maxsize=30): #nonweighted and undirected edges
+def mhda(g, seed=None, maxsize=100): #nonweighted and undirected edges
     if seed==None:
         seed=random.choice(list(g.nodes))
     if g.number_of_nodes() < maxsize:
         return set()
     current=seed
     prev=None
-    subgraph = set(current)
+    subgraph = set([current])
     while len(subgraph) <= maxsize:
         neigh=list(g.neighbors(current))
         temp1=random.choice(neigh)

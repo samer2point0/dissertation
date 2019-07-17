@@ -2,6 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import random
 import queue
+import copy
 
 concepts=set(['target', 'pro', 'anti'])
 
@@ -21,6 +22,7 @@ class Concept():
         #set up seed sets
         self.seed=func(g,seedsize)
         self.newNodes=self.seed
+        self.active=copy.deepcopy(self.newNodes)
         for node in self.seed:
             g.nodes[node]['concept']=set(name)
 
@@ -35,12 +37,12 @@ class Concept():
                 p=random.random()
                 CI=self.context(node,n)#NONWEIGHTED GRAPH
                 if p < CI:
-                    try: #concepts activate once
-                        if not self.name in self.g.nodes[n]['concept']:
+                    if not n in self.active:
+                        try:
                             self.g.nodes[n]['concept'].add(self.name)
-                            newN.add(n)
-                    except (KeyError, TypeError) as e:
-                        self.g.nodes[n]['concept']=set(self.name)
+                        except (KeyError, TypeError) as e:
+                            self.g.nodes[n]['concept']=set([self.name])
+                        self.active.add(n)
                         newN.add(n)
         self.newNodes=newN
 
