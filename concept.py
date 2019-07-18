@@ -10,15 +10,15 @@ def randseed(g, size):
     return set(random.choices(list(g.nodes),k=size))
 
 class Concept():
-    def __init__(self,g,name,seedsize=10,func=randseed,factor=0.1):
-        self.factor=factor
+    def __init__(self,g,name,seedsize=100,func=randseed,PP=0.08, r=[2,0.5]):
+        self.PP=PP
         self.name=name
         self.g=g
         #set up multicpncept influence factors for pr ant case
         self.r=dict(zip(concepts,[1,1,1]))#influence for reciever and sender is the same
         if name=='target':
-            self.r['pro']=1.1
-            self.r['anti']=0.9
+            self.r['B']=r[0]
+            self.r['inH']=r[1]
         #set up seed sets
         self.seed=func(g,seedsize)
         self.newNodes=self.seed
@@ -47,7 +47,7 @@ class Concept():
         self.newNodes=newN
 
     def context(self, send, rec):
-        ci=self.factor
+        ci=self.PP
         try:
             for c in send['concept']:
                 ci=ci*self.r[c]

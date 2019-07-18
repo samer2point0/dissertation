@@ -4,7 +4,9 @@ import random
 import queue
 import sampling
 import concept
-
+import algor
+import numpy
+import copy
 
 def present(g, sub, col=['#dbb844'],pos=None):
     #takes graph, list of sub node lists, and list of colors
@@ -21,20 +23,27 @@ def present(g, sub, col=['#dbb844'],pos=None):
 
 def readG(f):
     f=open(f, 'rb')
-    G=nx.read_edgelist(f)#, nodetype='int')#, delimiter='\n')
+    g=nx.read_edgelist(f)#, nodetype='int')#, delimiter='\n')
     f.close()
-    return G
+    return g
 
-def prop(g):
-    Active=set()
+def test(g, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5]):
     #pos=nx.spring_layout(g)
-    while target.newNodes:
-        newActive=target.newNodes
-        print(newActive)
-        #present(g, [target.active],['#dd4f5f'], pos=pos)
-        target.update()
+    l=[]
+    for i in range(0,100):
+        G=copy.deepcopy(g)
+        T=concept.Concept(G, 'target', PP=PP, r=r)
+        B=concept.Concept(G, 'B', func=FB, PP=PP)
+        inH=concept.Concept(G, 'inH', func=FinH, PP=PP)
+        while T.newNodes:
+            T.update()
+            B.update()
+            inH.update()
+        l.append(len(T.active))
 
-#G=readG('gr.txt')
-#sG=G.subgraph(sn)
-#target=concept.Concept(G, name='target', seedsize=8, factor=0.2)
-#prop(G)
+    l=numpy.array(l)
+    print('target has spread to ', numpy.average(l), ' nodes with a std dev of ', numpy.std(l))
+
+
+G=readG('gr.txt')
+test(G, PP=0.08)
