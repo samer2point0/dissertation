@@ -20,7 +20,7 @@ class Concept():
             self.r['B']=r[0]
             self.r['inH']=r[1]
         #set up seed sets
-        self.seed=func(g,seedsize)
+        self.seed=func(g,PP,seedsize)
         self.newNodes=self.seed
         self.active=copy.deepcopy(self.newNodes)
         for node in self.seed:
@@ -35,7 +35,7 @@ class Concept():
             neigh=self.g.neighbors(node)
             for n in neigh:
                 p=random.random()
-                CI=self.context(node,n)#NONWEIGHTED GRAPH
+                CI=self.context(self.g.nodes[node],self.g.nodes[n])#NONWEIGHTED GRAPH
                 if p < CI:
                     if not n in self.active:
                         try:
