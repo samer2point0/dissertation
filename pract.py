@@ -27,14 +27,15 @@ def readG(f):
     f.close()
     return g
 
-def test(g, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=100, p=0.05):
+def test(g, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=100):
     #pos=nx.spring_layout(g)
     l=[]
-    for i in range(0,1):
+    for i in range(0,100):
         G=copy.deepcopy(g)
-        T=concept.Concept(G, 'target', PP=PP, r=r, seedsize=seedsize, PP=p)
-        B=concept.Concept(G, 'B', func=FB, PP=PP, seedsize=seedsize, PP=p)
-        inH=concept.Concept(G, 'inH', func=FinH, PP=PP, seedsize=seedsize, PP=p)
+        T=concept.Concept(G, 'target', PP=PP, r=r, seedsize=seedsize)
+        tSet=copy.deepcopy(T.seed)
+        B=concept.Concept(G, 'B', func=FB, PP=PP, r=r, seedsize=seedsize, tSet=tSet)
+        inH=concept.Concept(G, 'inH', func=FinH, PP=PP, r=r, seedsize=seedsize, tSet=tSet)
         while T.newNodes:
             T.update()
             B.update()
@@ -46,5 +47,5 @@ def test(g, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize
 
 
 G=readG('gr.txt')
-test(G, PP=0.05,FB=algor.degDisc, seedsize=250)
-test(G, PP=0.05,FinH=algor.degree, seedsize=250)
+test(G, PP=0.05,FB=algor.MPG, seedsize=250)
+test(G, PP=0.05,FB=algor.degree, seedsize=250)

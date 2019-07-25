@@ -6,11 +6,11 @@ import copy
 
 concepts=set(['target', 'pro', 'anti'])
 
-def randseed(g, size):
-    return set(random.choices(list(g.nodes),k=size))
+def randseed(g, p, seedsize, tSet=None, r=1):
+    return set(random.choices(list(g.nodes),k=seedsize))
 
 class Concept():
-    def __init__(self,g,name,seedsize=100,func=randseed,PP=0.08, r=[2,0.5]):
+    def __init__(self,g,name,seedsize=100,func=randseed,PP=0.08, r=[2,0.5], tSet=set()):
         self.PP=PP
         self.name=name
         self.g=g
@@ -19,10 +19,14 @@ class Concept():
         if name=='target':
             self.r['B']=r[0]
             self.r['inH']=r[1]
+            self.seed=func(g,PP,seedsize, tSet=tSet)
+        elif name =='B':
+            self.seed=func(g,PP,seedsize, tSet=tSet, r=r[0])
+        elif name =='inH':
+            self.seed=func(g,PP,seedsize, tSet=tSet, r=r[1])
         #set up seed sets
-        self.seed=func(g,PP,seedsize)
-        self.newNodes=self.seed
-        self.active=copy.deepcopy(self.newNodes)
+        self.newNodes=copy.deepcopy(self.seed)
+        self.active=copy.deepcopy(self.seed)
         for node in self.seed:
             g.nodes[node]['concept']=set(name)
 
