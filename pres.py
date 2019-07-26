@@ -1,16 +1,12 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-import random
-import queue
-import sampling
-import concept
-import algor
+import pandas as pd
 import numpy
+import algor
+import itertools
 import copy
 
-
-
-def present(g, sub, col=['#dbb844'],pos=None):
+def drawN(g, sub, col=['#dbb844'],pos=None):
     #takes graph, list of sub node lists, and list of colors
     if pos==None:
         pos=nx.spring_layout(g)
@@ -22,3 +18,24 @@ def present(g, sub, col=['#dbb844'],pos=None):
         cL.extend([col[i]]*len(sub[i]))
     nx.draw(g, nodelist=nL, node_color=cL, with_labels=False, pos=pos)
     plt.show()
+
+def matrix(DF, exL):
+    exl=copy.deepcopy(exL)
+    L=set(list(zip(*exl))[0])
+    m=pd.DataFrame(numpy.zeros((len(L),len(L))), columns=L, index=L)
+    s=pd.DataFrame(numpy.zeros((len(L),len(L))), columns=L, index=L)
+    for exp in exL:
+        #only loops through functions now
+        c=str([exp[0], exp[1], 0.05, [2, 0.5], 250])
+        if c in DF.columns:
+            #col boost and rows inH
+            m[exp[0]].loc[exp[1]]=DF[c].mean()
+            s[exp[0]].loc[exp[1]]=DF[c].std()
+
+    print(m,'\n\n', s)
+
+flist=['MPG', 'randseed', 'degree', 'myDisc', 'degDisc', 'sinDisc']
+fflist=itertools.product(flist, repeat=2)
+DF=pd.read_csv('gr_test.txt')
+#print(list(fflist))
+matrix(DF, fflist)

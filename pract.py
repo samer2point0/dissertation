@@ -5,6 +5,7 @@ import algor
 import numpy
 import copy
 import pandas as pd
+import itertools
 
 def readG(f):
     f=open(f, 'rb')
@@ -54,6 +55,9 @@ def test(gType, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[
     else:
         print('target has spread to ', numpy.average(l), ' nodes with a std dev of ', numpy.std(l))
 
+def tfunc(flist=[algor.MPG, algor.randseed, algor.degree, algor.myDisc, algor.degDisc, algor.sinDisc]):
+    fflist=itertools.product(flist, repeat=2)
+    for ff in fflist:
+        test('gr', save=True, PP=0.05, FB=ff[0], FinH=ff[1], seedsize=250)
 
-
-#test('gr', save=False, PP=0.05,FB=algor.MPG, FinH=algor.degree, seedsize=250
+test('gr', save=True, PP=0.05, FB=algor.randseed, FinH=algor.degC, seedsize=250)

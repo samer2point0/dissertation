@@ -1,7 +1,7 @@
 import networkx as nx
 import random
 import copy
-
+import heapq
 
 def randseed(g, p, seedsize, tSet=None, r=1):
     return set(random.choices(list(g.nodes),k=seedsize))
@@ -126,5 +126,30 @@ def MPG(g,p, seedsize, tSet=None, r=1):
 
     return seed
 
-def bet(g,p, seedsize, tSet=None, r=1):
-    pass
+def degC(g,p, seedsize, tSet=None, r=1):
+    neigh=[]
+    D={}
+    for t in tSet:
+        neigh.extend(list(g.neighbors(t)))
+
+    for e in neigh:
+        if not e in D:
+            D[e]=0
+        D[e]=D[e]+g.degree[e]
+
+    seed=set(sorted(D, key=lambda x:D[x])[0:seedsize])
+    return seed
+
+def betC(g,p, seedsize, tSet=None, r=1):
+    neigh=[]
+    D={}
+    for t in tSet:
+        neigh=neigh.extend(list(g.neighbors(t)))
+
+    for e in neigh:
+        if not e in D:
+            D[e]=0
+        D[e]=D[e]+nx.betweeness_centrality(g, e)
+
+    seed=set(sorted(D, key=lambda x:D[x])[0:seedsize])
+    return seed
