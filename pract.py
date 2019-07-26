@@ -1,25 +1,10 @@
 import networkx as nx
-import matplotlib.pyplot as plt
-import random
-import queue
 import sampling
 import concept
 import algor
 import numpy
 import copy
-
-def present(g, sub, col=['#dbb844'],pos=None):
-    #takes graph, list of sub node lists, and list of colors
-    if pos==None:
-        pos=nx.spring_layout(g)
-    dcol='#668aae'
-    nL=[x for x in g.nodes() if not x in sub]
-    cL=[dcol]*len(nL)
-    for i in range(0,len(sub)):
-        nL.extend(sub[i])
-        cL.extend([col[i]]*len(sub[i]))
-    nx.draw(g, nodelist=nL, node_color=cL, with_labels=False, pos=pos)
-    plt.show()
+import pandas as pd
 
 def readG(f):
     f=open(f, 'rb')
@@ -27,9 +12,28 @@ def readG(f):
     f.close()
     return g
 
-def test(g, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=100):
-    #pos=nx.spring_layout(g)
+def saveRes(gType, l, kw):
+    #organized by graoh
+    #must save differently for each sample
+    try:
+        DF=pd.read_csv(gType+'_test.txt')
+    except IOError:
+        DF=pd.DataFrame()#index=[list(kw.values())]))#columns=list(range(0,len(l))))
+
+
+    exp=str(list(kw.values()))
+    df=pd.DataFrame(l,columns=[exp])
+    if exp in DF.columns:
+        ax=0
+    else:
+        ax=1
+    DF=pd.concat([df,DF], axis=ax, join='outer')
+    print(DF)
+    DF.to_csv(gType+'_test.txt', index=False)
+
+def test(gType, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=100):
     l=[]
+    g=readG(gType+'.txt')
     for i in range(0,100):
         G=copy.deepcopy(g)
         T=concept.Concept(G, 'target', PP=PP, r=r, seedsize=seedsize)
@@ -43,9 +47,13 @@ def test(g, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize
         l.append(len(T.active))
 
     l=numpy.array(l)
-    print('target has spread to ', numpy.average(l), ' nodes with a std dev of ', numpy.std(l))
+
+    if save:
+        kw={'FB':FB.__name__, 'FinH':FinH.__name__, 'PP':PP, 'r':r, 'seedsize':seedsize}
+        saveRes(gType, l, kw)
+    else:
+        print('target has spread to ', numpy.average(l), ' nodes with a std dev of ', numpy.std(l))
 
 
-G=readG('gr.txt')
-test(G, PP=0.05,FB=algor.MPG, seedsize=250)
-test(G, PP=0.05,FB=algor.degree, seedsize=250)
+
+#test('gr', save=False, PP=0.05,FB=algor.MPG, FinH=algor.degree, seedsize=250
