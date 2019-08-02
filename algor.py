@@ -2,6 +2,7 @@ import networkx as nx
 import random
 import copy
 import heapq
+import sampling
 
 def randseed(g, p, seedsize, tSet=None, r=1):
     return set(random.choices(list(g.nodes),k=seedsize))
@@ -41,7 +42,7 @@ def myDisc(g,p,  seedsize, tSet=None, r=1):
             i=i+1
     return set(seed[0:seedsize])
 
-def sinDisc(g,p,  seedsize, tSet=None, r=1):
+def sinDisc(g,p,  seedsize, tSet=None, r=1):#minus tSet
     l=dict(g.degree)
     seed=set()
     while True:
@@ -51,13 +52,13 @@ def sinDisc(g,p,  seedsize, tSet=None, r=1):
             break
         neigh=list(g.neighbors(v))
         for pot in neigh:
-            if not pot in seed:
+            if not pot in seed and not pot in tSet:
                 l[pot]=l[pot]-1
 
         del l[v]
     return seed
 
-def degDisc(g,p, seedsize, tSet=None, r=1):
+def degDisc(g,p, seedsize, tSet=None, r=1):#minus tSet
     l=dict(g.degree)
     seed=set()
     while True:
@@ -70,7 +71,7 @@ def degDisc(g,p, seedsize, tSet=None, r=1):
         for u in neigh:
             nei=set(g.neighbors(u))
             tu=len(neigh.intersection(seed))
-            if not u in seed:
+            if not u in seed and not u in tSet:
                 l[u]=l[u]-2*tu-(l[u]-tu)*p*tu
 
         del l[v]
@@ -105,51 +106,107 @@ def MPG(g,p, seedsize, tSet=None, r=1):
 
     while True:
         v=max(N, key=lambda x:N[x]['we'])
-        seed.add(v)
+        if not (v in tSet):
+            seed.add(v)
         if len(seed)==seedsize:
             break
 
         #update expected gain
         for pa in N[v]['parents']:
-            if not pa in seed:
+            if not pa in seed and not pa in tSet:
                 N[pa]['eg']=N[pa]['eg']-p+r*p
                 N[pa]['we']=N[pa]['ap']*N[pa]['eg']
 
         #update activation prob
         nei=neigh.intersection(g.neighbors(v))
         for k in nei:
-            if not k in seed:
+            if not k in seed and not k in tSet:
                 N[k]['ap']=N[k]['ap']-p+p*r
                 N[k]['we']=N[k]['ap']*N[k]['eg']
 
         del N[v]
-
     return seed
 
-def degC(g,p, seedsize, tSet=None, r=1):
-    neigh=[]
+
+def degN(g,p, seedsize, tSet=None, r=1):
+    neigh=set()
+    l=dict(g.degree)
     D={}
-    for t in tSet:
-        neigh.extend(list(g.neighbors(t)))
+    c=0.9
+    Set=[tSet]
+    for i in range(0,3):
+        nei=set()
+        for t in Set[i]:
+            nei=nei.union(set(g.neighbors(t)))
+        Set.append(nei)
+        neigh=neigh.union(nei)
 
-    for e in neigh:
-        if not e in D:
-            D[e]=0
-        D[e]=D[e]+g.degree[e]
+    neigh=neigh.difference(tSet)
 
-    seed=set(sorted(D, key=lambda x:D[x])[0:seedsize])
+    for i in range(1,4):
+        for n in Set[i]:
+            l[n]=l[n]*pow(c,i-1)
+
+    seed=set()
+    temp=set()
+    while True:
+        v=max(l, key=lambda x:l[x])
+        temp.add(v)
+        if v in neigh:
+            seed.add(v)
+            if len(seed)==seedsize:
+                break
+            nei=list(g.neighbors(v))
+            for pot in nei:
+                if not pot in temp:
+                    l[pot]=l[pot]-1
+
+        del l[v]
     return seed
 
 def betC(g,p, seedsize, tSet=None, r=1):
-    neigh=[]
-    D={}
+    #487mean, 41std
+    neigh=copy.deepcopy(tSet)
     for t in tSet:
-        neigh=neigh.extend(list(g.neighbors(t)))
+        neigh=neigh.union(set(g.neighbors(t)))
 
-    for e in neigh:
-        if not e in D:
-            D[e]=0
-        D[e]=D[e]+nx.betweeness_centrality(g, e)
+    print(len(neigh))
+    G=g.subgraph(neigh)
+    neigh=[]
+    D=dict(G.degree)
+    HD=set(sorted(D, key=lambda x:D[x], reverse=True)[:10])
+    C=nx.betweenness_centrality_subset(G, tSet, HD)
+    seed=set(sorted(C, key=lambda x: C[x] if not (x in tSet) else 0, reverse=True)[0:seedsize])
+    return seed
 
-    seed=set(sorted(D, key=lambda x:D[x])[0:seedsize])
+
+def neighs(g,p, seedsize, tSet=None, r=1):
+    seed=set()
+    neigh=set()
+    D=dict(g.degree)
+    ss=10
+
+    while len(seed)<seedsize:
+        ss=min(10, seedsize-len(seed))
+        s=max(D, key=lambda x:D[x])
+        seed=seed.union(sampling.snow(g, seed=s, maxsize=ss))
+        del D[s]
+        seed=seed.difference(tSet)
+    return seed
+
+def neisinD(g,p, seedsize, tSet=None, r=1):
+    l=dict(g.degree)
+    seed=set()
+    while True:
+        ss=min(10, seedsize-len(seed))
+        v=max(l, key=lambda x:l[x])
+        seed=seed.union(sampling.snow(g, seed=v, maxsize=ss))
+        seed=seed.difference(tSet)
+        if len(seed)>=seedsize:
+            break
+        neigh=list(g.neighbors(v))
+        for pot in neigh:
+            if not pot in seed and not pot in tSet:
+                l[pot]=l[pot]-ss
+        del l[v]
     return seed

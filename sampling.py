@@ -13,10 +13,12 @@ def snow(g, seed=None, maxsize=100):
     q.put(seed)
     subgraph = set([seed])
     while not q.empty():
-        for node in g.neighbors(q.get()):
-            if len(subgraph) < maxsize:
-                q.put(node)
-                subgraph.add(node)
+        t=q.get()
+        for node in g.neighbors(t):
+            if (len(subgraph) < maxsize):
+                if not (node in subgraph):
+                    q.put(node)
+                    subgraph.add(node)
             else :
                 return subgraph
 
