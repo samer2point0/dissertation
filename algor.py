@@ -3,6 +3,7 @@ import random
 import copy
 import heapq
 import sampling
+import tools
 
 def randseed(g, p, seedsize, tSet=None, r=1):
     return set(random.choices(list(g.nodes),k=seedsize))
@@ -47,7 +48,8 @@ def sinDisc(g,p,  seedsize, tSet=None, r=1):#minus tSet
     seed=set()
     while True:
         v=max(l, key=lambda x:l[x])
-        seed.add(v)
+        if not v in tSet:
+            seed.add(v)
         if len(seed)==seedsize:
             break
         neigh=list(g.neighbors(v))
@@ -63,7 +65,8 @@ def degDisc(g,p, seedsize, tSet=None, r=1):#minus tSet
     seed=set()
     while True:
         v=max(l, key=lambda x:l[x])
-        seed.add(v)
+        if not v in tSet:
+            seed.add(v)
         if len(seed)==seedsize:
             break
 
@@ -166,19 +169,24 @@ def degN(g,p, seedsize, tSet=None, r=1):
 
 def betC(g,p, seedsize, tSet=None, r=1):
     #487mean, 41std
-    neigh=copy.deepcopy(tSet)
-    for t in tSet:
-        neigh=neigh.union(set(g.neighbors(t)))
 
-    print(len(neigh))
-    G=g.subgraph(neigh)
-    neigh=[]
-    D=dict(G.degree)
-    HD=set(sorted(D, key=lambda x:D[x], reverse=True)[:10])
-    C=nx.betweenness_centrality_subset(G, tSet, HD)
+    C=nx.betweenness_centrality_subset(g, tSet, tSet)
     seed=set(sorted(C, key=lambda x: C[x] if not (x in tSet) else 0, reverse=True)[0:seedsize])
     return seed
 
+def NbetC(g,p, seedsize, tSet=None, r=1):
+    neigh=list(tSet)
+    for t in tSet:
+        neigh.extend(list(g.neighbors(t)))
+    Set=set(neigh)
+    for t in Set:
+        neigh.extend(list(g.neighbors(t)))
+
+    neigh=set(neigh).difference(tSet)
+
+    C=nx.betweenness_centrality(g, k=100)
+    seed=set(sorted(C, key=lambda x: C[x] if (x in neigh) else 0, reverse=True)[0:seedsize])
+    return seed
 
 def neighs(g,p, seedsize, tSet=None, r=1):
     seed=set()
@@ -196,17 +204,28 @@ def neighs(g,p, seedsize, tSet=None, r=1):
 
 def neisinD(g,p, seedsize, tSet=None, r=1):
     l=dict(g.degree)
+    L=copy.deepcopy(l)
     seed=set()
+    avgd=g.size()/g.number_of_nodes()
+    neigh=set()
+    for t in tSet:
+        neigh=neigh.union(set(g.neighbors(t)))
     while True:
-        ss=min(10, seedsize-len(seed))
         v=max(l, key=lambda x:l[x])
-        seed=seed.union(sampling.snow(g, seed=v, maxsize=ss))
-        seed=seed.difference(tSet)
+        if not v in tSet:
+            seed.add(v)
+        nei=set(g.neighbors(v))
+        d=dict((k,L[k]) for k in nei)
+        for i in range(0,min(len(nei),5)):
+            v1=max(d, key=lambda x:d[x])
+            if v1 in neigh and d[v1]>avgd:
+                seed.add(v1)
+            if d[v1]<2*avgd or len(seed)>=seedsize:
+                break
+            if not (v1 in tSet):
+                seed.add(v1)
+
         if len(seed)>=seedsize:
             break
-        neigh=list(g.neighbors(v))
-        for pot in neigh:
-            if not pot in seed and not pot in tSet:
-                l[pot]=l[pot]-ss
         del l[v]
     return seed

@@ -9,7 +9,8 @@ import itertools
 
 def readG(f):
     f=open(f, 'rb')
-    g=nx.read_edgelist(f)#, nodetype='int')#, delimiter='\n')
+    G=nx.read_edgelist(f)#, nodetype='int')#, delimiter='\n')
+    g= G.subgraph(max(list(nx.connected_components(G)), key=lambda x:len(x)))
     f.close()
     return g
 
@@ -35,7 +36,7 @@ def saveRes(gType, l, kw):
 def test(gType, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=100):
     l=[]
     g=readG(gType+'.txt')
-    for i in range(0,100):
+    for i in range(0,10):
         G=copy.deepcopy(g)
         T=concept.Concept(G, 'target', PP=PP, r=r, seedsize=seedsize)
         tSet=copy.deepcopy(T.seed)
@@ -46,6 +47,7 @@ def test(gType, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[
             B.update()
             inH.update()
         l.append(len(T.active))
+        print(l[i])
 
     l=numpy.array(l)
 
@@ -60,6 +62,13 @@ def tfunc(graph, flist=[algor.MPG, algor.randseed, algor.degree, algor.degDisc, 
     for ff in fflist:
         test(graph, save=True, PP=0.05, FB=ff[0], FinH=ff[1], seedsize=250)
 
+def prop(g):
+    print('number of nodes', g.number_of_nodes())
+    print('no of edges ', g.size())
+    print('graph has ', nx.number_connected_components(g), 'connected component')
+
+#g=readG('astroph.txt')
 #test('gr', save=False, PP=0.05, FB=algor.sinDisc, seedsize=250)
-#test('gr', save=False, PP=0.05, FB=algor.neisinD, seedsize=250)
-tfunc('astroph')
+test('astroph', save=False, PP=0.05, FB=algor.neisinD, seedsize=250)
+#tfunc('astroph')
+#prop(g)
