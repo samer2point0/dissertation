@@ -7,7 +7,11 @@ import copy
 concepts=set(['target', 'pro', 'anti'])
 
 def randseed(g, p, seedsize, tSet=None, r=1):
-    return set(random.choices(list(g.nodes),k=seedsize))
+    nodes=list(g.nodes)
+    seed= set(random.choices(nodes,k=seedsize))
+    while len(seed)<seedsize:
+        seed.add(random.choice(nodes))
+    return seed
 
 class Concept():
     def __init__(self,g,name,seedsize=100,func=randseed,PP=0.08, r=[2,0.5], tSet=set()):

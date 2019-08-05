@@ -36,6 +36,6 @@ def matrix(DF, exL):
 
 flist=['MPG', 'randseed', 'degree', 'neisinD', 'degDisc', 'sinDisc']
 fflist=itertools.product(flist, repeat=2)
-DF=pd.read_csv('astroph_test.txt')
+DF=pd.read_csv('gr_test.txt')
 #print(list(fflist))
 matrix(DF, fflist)

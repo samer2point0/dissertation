@@ -1,12 +1,16 @@
 import networkx as nx
 import random
 import copy
-import heapq
+import queue
 import sampling
 import tools
 
 def randseed(g, p, seedsize, tSet=None, r=1):
-    return set(random.choices(list(g.nodes),k=seedsize))
+    nodes=list(g.nodes)
+    seed= set(random.choices(nodes,k=seedsize))
+    while len(seed)<seedsize:
+        seed.add(random.choice(nodes))
+    return seed
 
 def degree(g,p, seedsize, tSet=None, r=1):
     l=sorted(g.degree, key=lambda x: x[1], reverse=True)
@@ -137,16 +141,17 @@ def degN(g,p, seedsize, tSet=None, r=1):
     D={}
     c=0.9
     Set=[tSet]
-    for i in range(0,3):
+    for i in range(0,4):
         nei=set()
         for t in Set[i]:
             nei=nei.union(set(g.neighbors(t)))
+        nei=nei.difference(neigh)
         Set.append(nei)
         neigh=neigh.union(nei)
 
     neigh=neigh.difference(tSet)
 
-    for i in range(1,4):
+    for i in range(1,5):
         for n in Set[i]:
             l[n]=l[n]*pow(c,i-1)
 
@@ -167,65 +172,76 @@ def degN(g,p, seedsize, tSet=None, r=1):
         del l[v]
     return seed
 
-def betC(g,p, seedsize, tSet=None, r=1):
-    #487mean, 41std
+def voterank(g,p, seedsize, tSet=None, r=1):
+    C=nx.voterank(g, number_of_nodes=seedsize)
+    return set(C)
 
-    C=nx.betweenness_centrality_subset(g, tSet, tSet)
-    seed=set(sorted(C, key=lambda x: C[x] if not (x in tSet) else 0, reverse=True)[0:seedsize])
-    return seed
-
-def NbetC(g,p, seedsize, tSet=None, r=1):
-    neigh=list(tSet)
-    for t in tSet:
-        neigh.extend(list(g.neighbors(t)))
-    Set=set(neigh)
-    for t in Set:
-        neigh.extend(list(g.neighbors(t)))
-
-    neigh=set(neigh).difference(tSet)
-
-    C=nx.betweenness_centrality(g, k=100)
-    seed=set(sorted(C, key=lambda x: C[x] if (x in neigh) else 0, reverse=True)[0:seedsize])
-    return seed
-
-def neighs(g,p, seedsize, tSet=None, r=1):
-    seed=set()
-    neigh=set()
+def voteN(g,p, seedsize, tSet=None, r=1):
+    t=5
+    Q=copy.deepcopy(tSet)
+    V={}
     D=dict(g.degree)
-    ss=10
+    for i in range(0,t):
+        q=copy.deepcopy(Q)
+        for x in q:
+            if not x in V:
+                V[x]=0
+            V[x]=V[x]-1
+            Q.remove(x)
 
-    while len(seed)<seedsize:
-        ss=min(10, seedsize-len(seed))
-        s=max(D, key=lambda x:D[x])
-        seed=seed.union(sampling.snow(g, seed=s, maxsize=ss))
-        del D[s]
-        seed=seed.difference(tSet)
+            vote=max(g.neighbors(x), key=lambda x:D[x] if not x in tSet else 0)
+            if not vote in V:
+                V[vote]=0
+            V[vote]=V[vote]+1
+            Q.add(vote)
+
+        Q=Q.union(tSet)
+
+    seed=set(sorted(V, key=lambda x: V[x], reverse=True)[0:seedsize])
     return seed
 
-def neisinD(g,p, seedsize, tSet=None, r=1):
-    l=dict(g.degree)
-    L=copy.deepcopy(l)
-    seed=set()
-    avgd=g.size()/g.number_of_nodes()
-    neigh=set()
-    for t in tSet:
-        neigh=neigh.union(set(g.neighbors(t)))
-    while True:
-        v=max(l, key=lambda x:l[x])
-        if not v in tSet:
-            seed.add(v)
-        nei=set(g.neighbors(v))
-        d=dict((k,L[k]) for k in nei)
-        for i in range(0,min(len(nei),5)):
-            v1=max(d, key=lambda x:d[x])
-            if v1 in neigh and d[v1]>avgd:
-                seed.add(v1)
-            if d[v1]<2*avgd or len(seed)>=seedsize:
-                break
-            if not (v1 in tSet):
-                seed.add(v1)
+def close(g,p, seedsize, tSet=None, r=1):
+    l=sorted(g.degree, key=lambda x: x[1], reverse=True)
+    tpot=[x[0] for x in l if x not in tSet][0:int(seedsize*2)]
+    pot=set(tpot)
+    CD={}
+    flag=set()
+    sw=10
 
-        if len(seed)>=seedsize:
-            break
-        del l[v]
+    for t in tSet:
+        Set=set(g.neighbors(t))
+        for n in Set:
+            if ((n in pot) and (not (t,n) in flag)):
+                flag.add((t,n))
+                if not n in CD:
+                    CD[n]=0
+                CD[n]=CD[n]+1
+
+            Set1=set([x for x in g.neighbors(n) if x not in Set])
+            for n1 in Set1:
+                if ((n1 in pot) and (not (t,n1) in flag)):
+                    flag.add((t,n1))
+                    if not n1 in CD:
+                        CD[n1]=0
+                    CD[n1]=CD[n1]+2
+
+                Set2=set([x for x in g.neighbors(n1) if x not in (Set.union(Set1))])
+                for n2 in Set2:
+                    if ((n2 in pot) and (not (t,n2) in flag)):
+                        flag.add((t,n2))
+                        if not n2 in CD:
+                            CD[n2]=0
+                        CD[n2]=CD[n2]+3
+
+
+        leftpot=[x for x in pot if not (t,x) in flag]
+        for p in leftpot:
+            flag.add((t,p))
+            if not p in CD:
+                CD[p]=0
+            CD[p]=CD[p]+sw
+
+    seed=set(sorted(CD, key=lambda x: CD[x], reverse=False)[0:seedsize])
+    print(len(seed.intersection(set(tpot[0:seedsize]))))
+
     return seed

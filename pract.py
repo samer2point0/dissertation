@@ -57,7 +57,7 @@ def test(gType, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[
     else:
         print('target has spread to ', numpy.average(l), ' nodes with a std dev of ', numpy.std(l))
 
-def tfunc(graph, flist=[algor.MPG, algor.randseed, algor.degree, algor.degDisc, algor.sinDisc, algor.neisinD]):
+def tfunc(graph, flist=[algor.MPG, algor.randseed, algor.degree, algor.degDisc, algor.sinDisc, algor.close]):
     fflist=itertools.product(flist, repeat=2)
     for ff in fflist:
         test(graph, save=True, PP=0.05, FB=ff[0], FinH=ff[1], seedsize=250)
@@ -69,6 +69,6 @@ def prop(g):
 
 #g=readG('astroph.txt')
 #test('gr', save=False, PP=0.05, FB=algor.sinDisc, seedsize=250)
-test('astroph', save=False, PP=0.05, FB=algor.neisinD, seedsize=250)
+test('gr', save=False, PP=0.05, FB=algor.voteN, seedsize=250)
 #tfunc('astroph')
 #prop(g)
