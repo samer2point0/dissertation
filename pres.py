@@ -5,19 +5,31 @@ import numpy
 import algor
 import itertools
 import copy
+import sampling
+import random
 
 def drawN(g, sub, col=['#dbb844'],pos=None):
     #takes graph, list of sub node lists, and list of colors
     if pos==None:
         pos=nx.spring_layout(g)
-    dcol='#668aae'
-    nL=[x for x in g.nodes() if not x in sub]
+    dcol='black'
+    nL=list(g.nodes())
     cL=[dcol]*len(nL)
     for i in range(0,len(sub)):
         nL.extend(sub[i])
         cL.extend([col[i]]*len(sub[i]))
-    nx.draw(g, nodelist=nL, node_color=cL, with_labels=False, pos=pos)
+
+    nx.draw(g, nodelist=nL, node_color=cL, with_labels=False, pos=pos, node_size=20, width=0.1)
     plt.show()
+    return pos
+
+def drawNsmp(g, sample, sub, size=100, col=None, pos=None):#graogh, set or list, list of sets, ..
+    G=g.subgraph(sample)
+    for i in range(0,len(sub)):
+        sub[i]=list(sub[i].intersection(sample))
+
+    pos=drawN(G, sub, col=col, pos=pos)
+    return pos
 
 def matrix(DF, exL):
     exl=copy.deepcopy(exL)
@@ -34,8 +46,10 @@ def matrix(DF, exL):
 
     print(m,'\n\n', s)
 
+"""
 flist=['MPG', 'randseed', 'degree', 'neisinD', 'degDisc', 'sinDisc']
 fflist=itertools.product(flist, repeat=2)
 DF=pd.read_csv('gr_test.txt')
 #print(list(fflist))
 matrix(DF, fflist)
+"""

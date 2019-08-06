@@ -6,6 +6,8 @@ import numpy
 import copy
 import pandas as pd
 import itertools
+import random
+import pres
 
 def readG(f):
     f=open(f, 'rb')
@@ -36,13 +38,21 @@ def saveRes(gType, l, kw):
 def test(gType, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=100):
     l=[]
     g=readG(gType+'.txt')
-    for i in range(0,10):
+    for i in range(0,1):
         G=copy.deepcopy(g)
         T=concept.Concept(G, 'target', PP=PP, r=r, seedsize=seedsize)
         tSet=copy.deepcopy(T.seed)
         B=concept.Concept(G, 'B', func=FB, PP=PP, r=r, seedsize=seedsize, tSet=tSet)
         inH=concept.Concept(G, 'inH', func=FinH, PP=PP, r=r, seedsize=seedsize, tSet=tSet)
+
+        seed=random.choice(list(tSet))
+        sample1=sampling.mhda(g, seed=seed, maxsize=50)
+        sample2=sampling.snow(g, seed=seed, maxsize=50)
+        pos1, pos2=None, None
         while T.newNodes:
+            print('run')
+            pos1=pres.drawNsmp(g, sample1, copy.deepcopy([T.active, B.active, T.active.intersection(B.active),set([seed])]), size=200, col=['yellow', '#668aae', 'green', 'red'], pos=pos1)
+            pos2=pres.drawNsmp(g, sample2, copy.deepcopy([T.active, B.active,T.active.intersection(B.active),set([seed])]), size=200, col=['yellow', '#668aae', 'green', 'red'], pos=pos2)
             T.update()
             B.update()
             inH.update()
@@ -57,7 +67,7 @@ def test(gType, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[
     else:
         print('target has spread to ', numpy.average(l), ' nodes with a std dev of ', numpy.std(l))
 
-def tfunc(graph, flist=[algor.MPG, algor.randseed, algor.degree, algor.degDisc, algor.sinDisc, algor.close]):
+def tfunc(graph, flist=[algor.MPG, algor.randseed, algor.degree, algor.degDisc, algor.sinDisc, algor.close, algor.voterank, algor.degN]):
     fflist=itertools.product(flist, repeat=2)
     for ff in fflist:
         test(graph, save=True, PP=0.05, FB=ff[0], FinH=ff[1], seedsize=250)

@@ -4,6 +4,7 @@ import copy
 import queue
 import sampling
 import tools
+import pres
 
 def randseed(g, p, seedsize, tSet=None, r=1):
     nodes=list(g.nodes)
