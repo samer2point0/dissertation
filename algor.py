@@ -178,27 +178,44 @@ def voterank(g,p, seedsize, tSet=None, r=1):
     return set(C)
 
 def voteN(g,p, seedsize, tSet=None, r=1):
-    t=5
     Q=copy.deepcopy(tSet)
-    V={}
     D=dict(g.degree)
-    for i in range(0,t):
+    seed=set()
+    avgd=g.size()/g.number_of_nodes()
+    ln=list(g.nodes)
+    V=dict(zip(ln,[0]*len(ln)))
+    VP=dict(zip(ln,[1]*len(ln)))
+    i=0
+    k=10
+    d=0.85
+    while True:
         q=copy.deepcopy(Q)
-        for x in q:
-            if not x in V:
-                V[x]=0
-            V[x]=V[x]-1
-            Q.remove(x)
+        for n in q:
+            Q.remove(n)
+            nei=[x for x in g.neighbors(n) if not x in seed and not x in tSet]
+            for vote in nei:
+                V[vote]=V[vote]+VP[n]
+                r=random.random()
+                if(r<pow(d,i)):
+                    Q.add(vote)
+        i=i+1
+        if Q==set():
+            Q=Q.union(tSet)
+            i=0
+        for j in range(k):
+            topk=max(V, key=lambda x: V[x]  if not x in tSet else 0)
+            #print(len(seed))
+            seed.add(topk)
+            if topk in Q:
+                Q.remove(topk)
+            del V[topk]
+            nei=[x for x in g.neighbors(topk) if not x in seed and not x in tSet]
+            for n in nei:
+                VP[n]=VP[n]-1/avgd
 
-            vote=max(g.neighbors(x), key=lambda x:D[x] if not x in tSet else 0)
-            if not vote in V:
-                V[vote]=0
-            V[vote]=V[vote]+1
-            Q.add(vote)
+        if(len(seed)>=seedsize):
+            break
 
-        Q=Q.union(tSet)
-
-    seed=set(sorted(V, key=lambda x: V[x], reverse=True)[0:seedsize])
     return seed
 
 def close(g,p, seedsize, tSet=None, r=1):
@@ -243,6 +260,6 @@ def close(g,p, seedsize, tSet=None, r=1):
             CD[p]=CD[p]+sw
 
     seed=set(sorted(CD, key=lambda x: CD[x], reverse=False)[0:seedsize])
-    print(len(seed.intersection(set(tpot[0:seedsize]))))
+    #print(len(seed.intersection(set(tpot[0:seedsize]))))
 
     return seed
