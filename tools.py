@@ -16,6 +16,7 @@ def readG(fname):
     f.close()
     return g
 
+
 def saveRes(gType, l, kw):
     #organized by graoh
     #must save differently for each sample
@@ -34,6 +35,15 @@ def saveRes(gType, l, kw):
     DF=pd.concat([df,DF], axis=ax, join='outer')
     print(DF)
     DF.to_csv('./tests/'+gType+'_test.txt', index=False)
+
+def nsample(gName, n, sampler, size=20000):
+    g=readG(gName)
+    for i in range(n):
+        path='./samples/'+gName+'_'+sampler.__name__+'_smp'+str(i)+'.txt'
+        sn=sampler(g, maxsize=size)
+        sG=g.subgraph(sn)
+        nx.write_edgelist(sG, path)
+        print(path)
 
 def prop(g):
     print('number of nodes', g.number_of_nodes())
