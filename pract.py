@@ -4,45 +4,20 @@ import concept
 import algor
 import numpy
 import copy
-import pandas as pd
 import itertools
 import random
 import pres
+import tools
 
-def readG(fname):
-    f=open('./samples/'+fname+'.txt', 'rb')
-    G=nx.read_edgelist(f)#, nodetype='int')#, delimiter='\n')
-    g= G.subgraph(max(list(nx.connected_components(G)), key=lambda x:len(x)))
-    f.close()
-    return g
-
-def saveRes(gType, l, kw):
-    #organized by graoh
-    #must save differently for each sample
-    try:
-        DF=pd.read_csv('./tests/'+gType+'_test.txt')
-    except IOError:
-        DF=pd.DataFrame()#index=[list(kw.values())]))#columns=list(range(0,len(l))))
-
-
-    exp=str(list(kw.values()))
-    df=pd.DataFrame(l,columns=[exp])
-    if exp in DF.columns:
-        ax=0
-    else:
-        ax=1
-    DF=pd.concat([df,DF], axis=ax, join='outer')
-    print(DF)
-    DF.to_csv('./tests/'+gType+'_test.txt', index=False)
 
 def test(gType, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=250):
     l=[]
-    for i in range(0,100):
+    for i in range(0,10):
         if 'smp' in gType:  #if network should be sampled
             n=random.choice(range(50))
-            g=readG(gType+str(n)) #ex: dplb_snow_smp10
+            g=tools.readG(gType+str(n)) #ex: dplb_snow_smp10
         elif i==0: #if not only read netwokr in first run
-            g=readG(gType)
+            g=tools.readG(gType)
 
         T=concept.Concept(g, 'target', PP=PP, r=r, seedsize=seedsize)
         tSet=copy.deepcopy(T.seed)
@@ -66,7 +41,7 @@ def test(gType, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[
 
     if save:
         kw={'FB':FB.__name__, 'FinH':FinH.__name__, 'PP':PP, 'r':r, 'seedsize':seedsize}
-        saveRes(gType, l, kw)
+        tools.saveRes(gType, l, kw)
     else:
         print('target has spread to ', numpy.average(l), ' nodes with a std dev of ', numpy.std(l))
 
@@ -81,13 +56,9 @@ def tfunc(graph, flist=[algor.MPG, algor.randseed, algor.degree, algor.degDisc, 
             #doesn't run
             test(graph, save=True, FB=ff[0], FinH=ff[1], PP=s[0], r=s[1], seedsize=s[2])
 
-def prop(g):
-    print('number of nodes', g.number_of_nodes())
-    print('no of edges ', g.size())
-    print('graph has ', nx.number_connected_components(g), 'connected component')
+
 
 #g=readG('astroph.txt')
 #test('astroph', save=False, PP=0.05, FB=algor.MPG, seedsize=250)
-#test('gr', save=False, PP=0.05, FB=algor.close, seedsize=250)
-tfunc('astroph')
-#prop(g)
+#test('gr', save=True, PP=0.05, FB=algor.close, seedsize=250)
+#tfunc('astroph')
