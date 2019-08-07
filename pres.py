@@ -8,6 +8,10 @@ import copy
 import sampling
 import random
 
+
+FuncList=['MPG', 'randseed', 'degree', 'degDisc', 'sinDisc', 'close', 'voteN', 'degN']
+SetupList=[[0.02,0.05], [[2,0.5], [5,0.2]], [250,500]]
+
 def drawN(g, sub, col=['#dbb844'],pos=None):
     #takes graph, list of sub node lists, and list of colors
     if pos==None:
@@ -31,25 +35,19 @@ def drawNsmp(g, sample, sub, size=100, col=None, pos=None):#graogh, set or list,
     pos=drawN(G, sub, col=col, pos=pos)
     return pos
 
-def matrix(DF, exL):
-    exl=copy.deepcopy(exL)
-    L=set(list(zip(*exl))[0])
-    m=pd.DataFrame(numpy.zeros((len(L),len(L))), columns=L, index=L)
-    s=pd.DataFrame(numpy.zeros((len(L),len(L))), columns=L, index=L)
-    for exp in exL:
-        #only loops through functions now
-        c=str([exp[0], exp[1], 0.05, [2, 0.5], 250])
-        if c in DF.columns:
-            #col boost and rows inH
-            m[exp[0]].loc[exp[1]]=DF[c].mean()
-            s[exp[0]].loc[exp[1]]=DF[c].std()
+def matrix(gType, flist=FuncList, slist=SetupList):
+    DF=pd.read_csv('./tests/'+gType+'_test.txt')
+    fflist=list(itertools.product(flist, repeat=2))
+    sslist=list(itertools.product(*slist))
+    for s in sslist:
+        m=pd.DataFrame(numpy.zeros((len(flist),len(flist))), columns=flist, index=flist)
+        std=pd.DataFrame(numpy.zeros((len(flist),len(flist))), columns=flist, index=flist)
+        for ffpair in fflist:
+            c=str([ffpair[0], ffpair[1], s[0], s[1], s[2]])
+            if c in DF.columns:
+                #col boost and rows inH
+                m[ffpair[0]].loc[ffpair[1]]=DF[c].mean()
+                std[ffpair[0]].loc[ffpair[1]]=DF[c].std()
 
-    print(m,'\n\n', s)
-
-"""
-flist=['MPG', 'randseed', 'degree', 'neisinD', 'degDisc', 'sinDisc']
-fflist=itertools.product(flist, repeat=2)
-DF=pd.read_csv('gr_test.txt')
-#print(list(fflist))
-matrix(DF, fflist)
-"""
+        print('\n\nBellow are the mean and std matrix for the set up \n',c)
+        print(m,'\n\n', std)
