@@ -8,7 +8,7 @@ import sampling
 import random
 
 
-FuncList=['MPG', 'randseed', 'degree', 'degDisc', 'sinDisc', 'close', 'voteN', 'degN','noSeed','randApart']
+FuncList=['noSeed', 'randseed', 'degree','sinDisc', 'degDisc', 'MPG', 'close', 'degN', 'voteN']
 SetupList=[[0.02,0.05], [[2,0.5], [5,0.2]], [100, 250,500]]
 
 def drawN(g, sub, col=['#dbb844'],pos=None):
