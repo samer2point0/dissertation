@@ -3,8 +3,9 @@ import random
 import copy
 import queue
 import sampling
-import tools
-import pres
+import time
+
+#import pres
 
 def randseed(g, p, seedsize, tSet=None, r=1):
     nodes=list(g.nodes)
@@ -13,44 +14,47 @@ def randseed(g, p, seedsize, tSet=None, r=1):
         seed.add(random.choice(nodes))
     return seed
 
-def degree(g,p, seedsize, tSet=None, r=1):
-    l=sorted(g.degree, key=lambda x: x[1], reverse=True)
-    return set([x[0] for x in l[0:seedsize]])
-
-
-def myDisc(g,p,  seedsize, tSet=None, r=1):
-    l=sorted(g.degree, key=lambda x: x[1])
-    seed=[l.pop()[0]]
-    neigh=list(g.neighbors(seed[0]))
-    pot=[l.pop()]
-    if pot in neigh:
-        pot[0][1]=pot[0][1]-1
-    flag=1
-    while flag:
-        x=l.pop()
-        while (not pot==[]) and x[1]<pot[-1][1]:
-            seed.insert(0, pot.pop()[0])
-            neigh.extend(list(g.neighbors(seed[0])))
-
-        if len(seed)>=seedsize:
-            flag=0
+def randApart(g, p, seedsize, tSet=None, r=1):
+    ln=list(g.nodes)
+    D=dict(g.degree)
+    topD=list(sorted(D, key=lambda x: D[x], reverse=False))
+    seed=set()
+    EI=int(seedsize*p*g.size()/g.number_of_nodes())
+    while True:
+        max=topD.pop()
+        pr=D[max]/g.size()
+        prob=EI*pr*pow((1-pr),(EI-1))
+        if prob < 0.2:
             break
 
-        x=(x[0],x[1]-neigh.count(x[0])) #discount 1 for each edge alfeady in set
-        i=0
-        while True:
-            if i==len(pot):
-                pot.insert(-1,x)
-                break
-            if x[1]<pot[i][1]:
-                pot.insert(i,x)
-                break
-            i=i+1
-    return set(seed[0:seedsize])
+
+    while len(seed)<seedsize:
+        sel=random.choice(ln)
+        if not sel in seed and sel in topD:
+            seed.add(sel)
+    return seed
+
+def degree(g,p, seedsize, tSet=None, r=1):
+    ln=list(g.nodes)
+    D=dict(g.degree)
+    topD=list(sorted(D, key=lambda x: D[x], reverse=False))
+    seed=set()
+    EI=int(seedsize*p*g.size()/g.number_of_nodes())
+    while True:
+        max=topD.pop()
+        pr=D[max]/g.size()
+        prob=EI*pr*pow((1-pr),(EI-1))
+        if prob < 0.2:
+            break
+
+    seed=set(topD[-seedsize:-1])
+    return seed
+
 
 def sinDisc(g,p,  seedsize, tSet=None, r=1):#minus tSet
     l=dict(g.degree)
     seed=set()
+
     while True:
         v=max(l, key=lambda x:l[x])
         if not v in tSet:
@@ -68,6 +72,8 @@ def sinDisc(g,p,  seedsize, tSet=None, r=1):#minus tSet
 def degDisc(g,p, seedsize, tSet=None, r=1):#minus tSet
     l=dict(g.degree)
     seed=set()
+
+
     while True:
         v=max(l, key=lambda x:l[x])
         if not v in tSet:
@@ -87,6 +93,7 @@ def degDisc(g,p, seedsize, tSet=None, r=1):#minus tSet
 
 
 def MPG(g,p, seedsize, tSet=None, r=1):
+    #begin=time.time()
     thresh=0.001
     N=dict()
     seed=set()
@@ -111,7 +118,6 @@ def MPG(g,p, seedsize, tSet=None, r=1):
         N[n]['eg']=g.degree[n]*p #equal weights
         N[n]['we']=N[n]['ap']*N[n]['eg']
 
-
     while True:
         v=max(N, key=lambda x:N[x]['we'])
         if not (v in tSet):
@@ -133,6 +139,7 @@ def MPG(g,p, seedsize, tSet=None, r=1):
                 N[k]['we']=N[k]['ap']*N[k]['eg']
 
         del N[v]
+    #print(time.time()-begin)
     return seed
 
 
@@ -142,7 +149,8 @@ def degN(g,p, seedsize, tSet=None, r=1):
     D={}
     c=0.9
     Set=[tSet]
-    for i in range(0,4):
+
+    for i in range(0,3):
         nei=set()
         for t in Set[i]:
             nei=nei.union(set(g.neighbors(t)))
@@ -152,7 +160,18 @@ def degN(g,p, seedsize, tSet=None, r=1):
 
     neigh=neigh.difference(tSet)
 
-    for i in range(1,5):
+    topD=list(sorted(l, key=lambda x: l[x], reverse=False))
+    EI=int(seedsize*p*g.size()/g.number_of_nodes())
+    while True:
+        m=topD.pop()
+        pr=l[m]/g.size()
+        prob=EI*pr*pow((1-pr),(EI-1))
+        if prob < 0.2:
+            break
+        elif m in neigh:
+            neigh.remove(m)
+
+    for i in range(1,4):
         for n in Set[i]:
             l[n]=l[n]*pow(c,i-1)
 
@@ -173,93 +192,76 @@ def degN(g,p, seedsize, tSet=None, r=1):
         del l[v]
     return seed
 
-def voterank(g,p, seedsize, tSet=None, r=1):
-    C=nx.voterank(g, number_of_nodes=seedsize)
-    return set(C)
 
 def voteN(g,p, seedsize, tSet=None, r=1):
-    Q=copy.deepcopy(tSet)
-    D=dict(g.degree)
-    seed=set()
-    avgd=g.size()/g.number_of_nodes()
+    #begin=time.time()
     ln=list(g.nodes)
+    avgd=g.size()/g.number_of_nodes()
+    Q=copy.deepcopy(tSet)
+    seed=set()
     V=dict(zip(ln,[0]*len(ln)))
     VP=dict(zip(ln,[1]*len(ln)))
-    i=0
-    k=10
-    d=0.85
+    k=int(seedsize/10)
+    c=nx.average_clustering(g,tSet)
     while True:
         q=copy.deepcopy(Q)
         for n in q:
             Q.remove(n)
             nei=[x for x in g.neighbors(n) if not x in seed and not x in tSet]
+            random.shuffle(nei)
+            i=0
             for vote in nei:
                 V[vote]=V[vote]+VP[n]
-                r=random.random()
-                if(r<pow(d,i)):
+                if i<=2 and VP[vote]>0:
                     Q.add(vote)
-        i=i+1
-        if Q==set():
-            Q=Q.union(tSet)
-            i=0
+                    i=i+1
+
         for j in range(k):
             topk=max(V, key=lambda x: V[x]  if not x in tSet else 0)
-            #print(len(seed))
             seed.add(topk)
+            if(len(seed)==seedsize):
+                break
             if topk in Q:
                 Q.remove(topk)
             del V[topk]
             nei=[x for x in g.neighbors(topk) if not x in seed and not x in tSet]
             for n in nei:
-                VP[n]=VP[n]-1/avgd
+                VP[n]=max(0, VP[n]-c)
 
-        if(len(seed)>=seedsize):
+        if(len(seed)==seedsize):
             break
-
+    #print(time.time()-begin)
     return seed
 
 def close(g,p, seedsize, tSet=None, r=1):
-    l=sorted(g.degree, key=lambda x: x[1], reverse=True)
-    tpot=[x[0] for x in l if x not in tSet][0:int(seedsize*2)]
+    l=dict(g.degree)
+    tpot=list(sorted(l, key=lambda x: l[x], reverse=True))[0:int(seedsize*2)]
     pot=set(tpot)
-    CD={}
+    CD=dict(zip(pot,[0]*len(pot)))
     flag=set()
-    sw=10
+    sw=5
 
     for t in tSet:
         Set=set(g.neighbors(t))
         for n in Set:
             if ((n in pot) and (not (t,n) in flag)):
                 flag.add((t,n))
-                if not n in CD:
-                    CD[n]=0
                 CD[n]=CD[n]+1
 
             Set1=set([x for x in g.neighbors(n) if x not in Set])
             for n1 in Set1:
                 if ((n1 in pot) and (not (t,n1) in flag)):
                     flag.add((t,n1))
-                    if not n1 in CD:
-                        CD[n1]=0
                     CD[n1]=CD[n1]+2
-
-                Set2=set([x for x in g.neighbors(n1) if x not in (Set.union(Set1))])
-                for n2 in Set2:
-                    if ((n2 in pot) and (not (t,n2) in flag)):
-                        flag.add((t,n2))
-                        if not n2 in CD:
-                            CD[n2]=0
-                        CD[n2]=CD[n2]+3
-
 
         leftpot=[x for x in pot if not (t,x) in flag]
         for p in leftpot:
             flag.add((t,p))
-            if not p in CD:
-                CD[p]=0
             CD[p]=CD[p]+sw
 
     seed=set(sorted(CD, key=lambda x: CD[x], reverse=False)[0:seedsize])
-    #print(len(seed.intersection(set(tpot[0:seedsize]))))
 
     return seed
+
+def noSeed(g,p, seedsize, tSet=None, r=1):
+    return set()

@@ -2,15 +2,14 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy
-import algor
 import itertools
 import copy
 import sampling
 import random
 
 
-FuncList=['MPG', 'randseed', 'degree', 'degDisc', 'sinDisc', 'close', 'voteN', 'degN']
-SetupList=[[0.02,0.05], [[2,0.5], [5,0.2]], [250,500]]
+FuncList=['MPG', 'randseed', 'degree', 'degDisc', 'sinDisc', 'close', 'voteN', 'degN','noSeed','randApart']
+SetupList=[[0.02,0.05], [[2,0.5], [5,0.2]], [100, 250,500]]
 
 def drawN(g, sub, col=['#dbb844'],pos=None):
     #takes graph, list of sub node lists, and list of colors
@@ -35,8 +34,8 @@ def drawNsmp(g, sample, sub, size=100, col=None, pos=None):#graogh, set or list,
     pos=drawN(G, sub, col=col, pos=pos)
     return pos
 
-def matrix(gType, flist=FuncList, slist=SetupList):
-    DF=pd.read_csv('./tests/'+gType+'_test.txt')
+def matrix(gName, flist=FuncList, slist=SetupList):
+    DF=pd.read_csv('./tests/'+gName+'_test.txt')
     fflist=list(itertools.product(flist, repeat=2))
     sslist=list(itertools.product(*slist))
     for s in sslist:

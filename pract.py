@@ -10,17 +10,20 @@ import pres
 import tools
 
 
-FuncList=[algor.MPG, algor.randseed, algor.degree, algor.degDisc, algor.sinDisc, algor.close, algor.voteN, algor.degN]
-SetupList=[[0.02,0.05], [[2,0.5], [5,0.2]], [250,500]]
+FuncList=[algor.MPG, algor.randseed, algor.degree, algor.degDisc, algor.sinDisc, algor.close, algor.voteN, algor.degN, algor.noSeed, algor.randApart]
+SetupList=[[0.02, 0.05], [[2,0.5], [5,0.2]], [100, 250,500]]
 
-def test(gType, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=250):
+def test(gName, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=250):
     l=[]
-    for i in range(0,100):
-        if 'smp' in gType:  #if network should be sampled
+    kw={'FB':FB.__name__, 'FinH':FinH.__name__, 'PP':PP, 'r':r, 'seedsize':seedsize}
+    for i in range(0,10):
+        if save and tools.expinDF(gName, kw):
+            break #break if expirement already saved
+        if 'smp' in gName:  #if network should be sampled
             n=random.choice(range(50))
-            g=tools.readG(gType+str(n)) #ex: dplb_snow_smp10
+            g=tools.readG(gName+str(n)) #ex: dplb_snow_smp10
         elif i==0: #if not only read netwokr in first run
-            g=tools.readG(gType)
+            g=tools.readG(gName)
 
         T=concept.Concept(g, 'target', PP=PP, r=r, seedsize=seedsize)
         tSet=copy.deepcopy(T.seed)
@@ -43,8 +46,7 @@ def test(gType, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[
     l=numpy.array(l)
 
     if save:
-        kw={'FB':FB.__name__, 'FinH':FinH.__name__, 'PP':PP, 'r':r, 'seedsize':seedsize}
-        tools.saveRes(gType, l, kw)
+        tools.saveRes(gName, l, kw)
     else:
         print('target has spread to ', numpy.average(l), ' nodes with a std dev of ', numpy.std(l))
 
@@ -58,9 +60,27 @@ def tfunc(graph, flist=FuncList, slist=SetupList):
             #doesn't run
             test(graph, save=True, FB=ffpair[0], FinH=ffpair[1], PP=s[0], r=s[1], seedsize=s[2])
 
+def replaceEXP(gName, L):
+    expList=itertools.product(L[0],L[1],L[2],L[3],L[4])
+    for l in expList:
+        tools.delExp([l[0].__name__, l[1].__name__, l[2],l[3],l[4]], gName)
+        test(gName, save=True, FB=l[0], FinH=l[1], PP=l[2], r=l[3], seedsize=l[4])
+        pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
 
+def replaceAT(gName, a):
+    expList=tools.delAtr(gName, a)
+    sL=[x.__name__ for x in FuncList]
+    for l in expList:
+        l[0]=FuncList[sL.index(l[0])]
+        l[1]=FuncList[sL.index(l[1])]
+        test(gName, save=True, FB=l[0], FinH=l[1], PP=l[2], r=l[3], seedsize=l[4])
+        #pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
 
-#g=readG('astroph.txt')
-#test('astroph', save=False, PP=0.05, FB=algor.MPG, seedsize=250)
-#test('gr', save=True, PP=0.05, FB=algor.close, seedsize=250)
-tfunc('astroph', slist=[[0.05],[[2,0.5]], [250]])
+#tfunc('gr')
+#pres.matrix('gr')
+
+#replaceEXP('gr', [[algor.randApart], [algor.noSeed], [0.05], [[5,0.2]], [500]])
+
+#VS
+test('astroph', FB=algor.voteN, FinH=algor.noSeed,PP=0.05, r=[5,0.2], seedsize=500)
+#test('astroph', FB=algor.degDisc, FinH=algor.degN,PP=0.05, r=[5,0.2], seedsize=250)

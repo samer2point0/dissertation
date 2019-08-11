@@ -17,24 +17,45 @@ def readG(fname):
     return g
 
 
-def saveRes(gType, l, kw):
+def saveRes(gName, l, kw):
     #organized by graoh
     #must save differently for each sample
     try:
-        DF=pd.read_csv('./tests/'+gType+'_test.txt')
+        DF=pd.read_csv('./tests/'+gName+'_test.txt')
     except IOError:
         DF=pd.DataFrame()#index=[list(kw.values())]))#columns=list(range(0,len(l))))
 
 
     exp=str(list(kw.values()))
     df=pd.DataFrame(l,columns=[exp])
+    if not exp in DF.columns:
+        DF=pd.concat([df,DF], axis=1, join='outer')
+        print(DF)
+        DF.to_csv('./tests/'+gName+'_test.txt', index=False)
+
+def expinDF(gName, kw):
+    try:
+        DF=pd.read_csv('./tests/'+gName+'_test.txt')
+    except IOError:
+        DF=pd.DataFrame()#index=[list(kw.values())]))#columns=list(range(0,len(l))))
+
+    exp=str(list(kw.values()))
     if exp in DF.columns:
-        ax=0
+        return True
     else:
-        ax=1
-    DF=pd.concat([df,DF], axis=ax, join='outer')
+        return False
+
+def delAtr(gName, f):
+    DF=pd.read_csv('./tests/'+gName+'_test.txt')
+    L=[]
+    for exp in DF.columns:
+        if f in exp:
+            L.append(eval(exp))
+            DF.drop(columns=exp, inplace=True)
+    DF.dropna(axis=0, how='all', inplace=True)
+    DF.to_csv('./tests/'+gName+'_test.txt', index=False)
     print(DF)
-    DF.to_csv('./tests/'+gType+'_test.txt', index=False)
+    return L
 
 def nsample(gName, n, sampler, size=20000):
     g=readG(gName)
@@ -49,3 +70,12 @@ def prop(g):
     print('number of nodes', g.number_of_nodes())
     print('no of edges ', g.size())
     print('graph has ', nx.number_connected_components(g), 'connected component')
+
+def delExp(l, gName):
+    DF=pd.read_csv('./tests/'+gName+'_test.txt')
+    exp=str(l)
+    if exp in DF.columns:
+        DF.drop(columns=exp, inplace=True)
+    DF.dropna(axis=0, how='all', inplace=True)
+    DF.to_csv('./tests/'+gName+'_test.txt', index=False)
+    print(DF)
