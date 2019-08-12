@@ -106,20 +106,20 @@ def MPG(g,p, seedsize, tSet=None, r=1):
             neigh=neigh.union(set(nei))
             for n in nei:
                 if not n in N.keys():
-                    N[n]={'ap':0, 'eg':0, 'we':0, 'parents':set()}
+                    N[n]={'aProb':0, 'expGain':0, 'weGain':0, 'parents':set()}
 
-                N[n]['ap']=N[n]['ap']+p
+                N[n]['aProb']=N[n]['aProb']+p
                 if not i==1:
                     N[n]['parents'].add(t)
         Set=neigh.difference(Set)
         i=i+1
 
     for n in neigh:
-        N[n]['eg']=g.degree[n]*p #equal weights
-        N[n]['we']=N[n]['ap']*N[n]['eg']
+        N[n]['expGain']=g.degree[n]*p #equal weights
+        N[n]['weGain']=N[n]['aProb']*N[n]['expGain']
 
     while True:
-        v=max(N, key=lambda x:N[x]['we'])
+        v=max(N, key=lambda x:N[x]['weGain'])
         if not (v in tSet):
             seed.add(v)
         if len(seed)==seedsize:
@@ -128,15 +128,15 @@ def MPG(g,p, seedsize, tSet=None, r=1):
         #update expected gain
         for pa in N[v]['parents']:
             if not pa in seed and not pa in tSet:
-                N[pa]['eg']=N[pa]['eg']-p+r*p
-                N[pa]['we']=N[pa]['ap']*N[pa]['eg']
+                N[pa]['expGain']=N[pa]['expGain']-p+r*p
+                N[pa]['weGain']=N[pa]['aProb']*N[pa]['expGain']
 
         #update activation prob
         nei=neigh.intersection(g.neighbors(v))
         for k in nei:
             if not k in seed and not k in tSet:
-                N[k]['ap']=N[k]['ap']-p+p*r
-                N[k]['we']=N[k]['ap']*N[k]['eg']
+                N[k]['aProb']=N[k]['aProb']-p+p*r
+                N[k]['weGain']=N[k]['aProb']*N[k]['expGain']
 
         del N[v]
     #print(time.time()-begin)
@@ -144,7 +144,7 @@ def MPG(g,p, seedsize, tSet=None, r=1):
 
 
 def degN(g,p, seedsize, tSet=None, r=1):
-    neigh=set()
+    neigh=copy.deepcopy(tSet)
     l=dict(g.degree)
     D={}
     c=0.9
@@ -184,10 +184,9 @@ def degN(g,p, seedsize, tSet=None, r=1):
             seed.add(v)
             if len(seed)==seedsize:
                 break
-            nei=list(g.neighbors(v))
+            nei=[x for x in g.neighbors(v) if not x in temp]
             for pot in nei:
-                if not pot in temp:
-                    l[pot]=l[pot]-1
+                l[pot]=l[pot]-1
 
         del l[v]
     return seed

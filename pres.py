@@ -8,8 +8,8 @@ import sampling
 import random
 
 
-FuncList=['noSeed', 'randseed', 'degree','sinDisc', 'degDisc', 'MPG', 'close', 'degN', 'voteN']
-SetupList=[[0.02,0.05], [[2,0.5], [5,0.2]], [100, 250,500]]
+FuncList=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','degN', 'voteN']
+SetupList=[[0.02,0.05], [[2,0.5], [5,0.2]], [250]]
 
 def drawN(g, sub, col=['#dbb844'],pos=None):
     #takes graph, list of sub node lists, and list of colors

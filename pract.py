@@ -10,7 +10,7 @@ import pres
 import tools
 
 
-FuncList=[algor.noSeed, algor.randseed, algor.degree, algor.sinDisc, algor.degDisc, algor.MPG, algor.close, algor.degN, algor.voteN]
+FuncList=[algor.noSeed, algor.randseed, algor.degree, algor.degDisc, algor.MPG, algor.degN, algor.voteN]
 SetupList=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]]
 
 def test(gName, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=250):
@@ -77,9 +77,7 @@ def replaceAT(gName, a):
         #pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
 
 tfunc('astroph')
-#pres.matrix('gr')
 
-#replaceEXP('gr', [[algor.randApart], [algor.noSeed], [0.05], [[5,0.2]], [500]])
 
 #VS
 #test('astroph', FB=algor.voteN, FinH=algor.noSeed,PP=0.05, r=[5,0.2], seedsize=500)
