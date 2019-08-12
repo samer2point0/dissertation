@@ -65,7 +65,7 @@ def replaceEXP(gName, L):
     for l in expList:
         tools.delExp([l[0].__name__, l[1].__name__, l[2],l[3],l[4]], gName)
         test(gName, save=True, FB=l[0], FinH=l[1], PP=l[2], r=l[3], seedsize=l[4])
-        pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
+        #pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
 
 def replaceAT(gName, a):
     expList=tools.delAtr(gName, a)
@@ -76,8 +76,8 @@ def replaceAT(gName, a):
         test(gName, save=True, FB=l[0], FinH=l[1], PP=l[2], r=l[3], seedsize=l[4])
         #pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
 
-tfunc('astroph')
-#pres.matrix('gr')
+#tfunc('astroph')
+pres.VS('gr')
 
 #replaceEXP('gr', [[algor.randApart], [algor.noSeed], [0.05], [[5,0.2]], [500]])
 

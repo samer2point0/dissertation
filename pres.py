@@ -6,6 +6,7 @@ import itertools
 import copy
 import sampling
 import random
+from scipy import stats
 
 
 FuncList=['noSeed', 'randseed', 'degree','sinDisc', 'degDisc', 'MPG', 'close', 'degN', 'voteN']
@@ -38,6 +39,7 @@ def matrix(gName, flist=FuncList, slist=SetupList):
     DF=pd.read_csv('./tests/'+gName+'_test.txt')
     fflist=list(itertools.product(flist, repeat=2))
     sslist=list(itertools.product(*slist))
+    L=[]
     for s in sslist:
         m=pd.DataFrame(numpy.zeros((len(flist),len(flist))), columns=flist, index=flist)
         std=pd.DataFrame(numpy.zeros((len(flist),len(flist))), columns=flist, index=flist)
@@ -50,3 +52,32 @@ def matrix(gName, flist=FuncList, slist=SetupList):
 
         print('\n\nBellow are the mean and std matrix for the set up \n',c)
         print(m,'\n\n', std)
+        L.append([m,std])
+
+    return L, sslist
+
+def VS(gName, flist=FuncList, slist=SetupList):
+    L=[]
+    DF=pd.read_csv('./tests/'+gName+'_test.txt')
+    fflist=list(itertools.product(flist, repeat=2))
+    sslist=list(itertools.product(*slist))
+    i=0
+    for s in sslist:
+        tDF=pd.DataFrame(numpy.zeros((len(flist),len(flist))), columns=flist, index=flist)
+        for (f1,f2) in fflist:
+            c1=str([f1, f2, s[0], s[1], s[2]])
+            c2=str([f2, f1, s[0], s[1], s[2]])
+            l1=DF[c1].tolist()
+            l2=DF[c2].tolist()
+
+            t1=[round(x,3) for x in list(stats.ttest_ind(l1, l2))]
+            t2=[round(x,3) for x in list(stats.ttest_ind(l2, l1))]
+            tDF[f1].loc[f2]=str(t1)
+            tDF[f1].loc[f2]=str(t2)
+
+        print('\n\nBellow are the VS t-tests for the set up \n',sslist[i])
+        print(tDF)
+        L.append(DF)
+        i=i+1
+
+    return L ,sslist
