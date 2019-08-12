@@ -55,9 +55,6 @@ def tfunc(graph, flist=FuncList, slist=SetupList):
     setup=list(itertools.product(*slist)) #(PP,r,seedsize)
     for s in setup:
         for ffpair in fflist:
-            #test(graph, save=True, FB=ff[0], FinH=ff[1])
-            #break
-            #doesn't run
             test(graph, save=True, FB=ffpair[0], FinH=ffpair[1], PP=s[0], r=s[1], seedsize=s[2])
 
 def replaceEXP(gName, L):
