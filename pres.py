@@ -56,7 +56,7 @@ def matrix(gName, flist=FuncList, slist=SetupList):
 
     return L, sslist
 
-def VS(gName, flist=FuncList, slist=SetupList):
+def vsMat(gName, flist=FuncList, slist=SetupList):
     L=[]
     DF=pd.read_csv('./tests/'+gName+'_test.txt')
     fflist=list(itertools.product(flist, repeat=2))
@@ -81,3 +81,39 @@ def VS(gName, flist=FuncList, slist=SetupList):
         i=i+1
 
     return L ,sslist
+
+
+def plotExp(gName, xAx,FC='inH', FB=FuncList, FinH=FuncList, slist=SetupList):
+    xi = 0 if xAx=='PP' else 1 #seedsize Excluded
+    tempslist=copy.deepcopy(slist)
+    del tempslist[xi]
+    sslist=list(itertools.product(*tempslist))
+    DF=pd.read_csv('./tests/'+gName+'_test.txt')
+
+    Fconst=FB if FC=='B' else FinH
+    Fchang=FinH if FC=='B' else FB
+    for s in sslist:
+        fig=plt.figure()
+        plt.title(str(s))
+        ax=fig.subplots(len(sslist), 1, squeeze=False)
+        for i in range(len(Fconst)):
+            for j in range(len(Fchang)):
+                print('runss')
+                x,y,yerr=[],[],[]
+                for z in range(len(slist[xi])):
+                    stemp=list(s)
+                    stemp.insert(xi, slist[xi][z]) #replace with slist if necassary
+                    x.append(slist[xi][z])
+
+                    b=i if FC=='B' else j
+                    h=j if FC=='B' else i
+                    c=str([FB[b], FinH[i], stemp[0], stemp[1], stemp[2]])
+                    y.append(DF[c].mean())
+                    yerr.append(DF[c].std())
+                ax[i,0].errorbar(x, y, yerr=yerr, label=Fchang[j])
+            ax[i,0].set_xlabel(Fconst[i]+ ' is '+ FC)
+
+        plt.legend(loc='lower right')
+        plt.show()
+
+plotExp('gr', 'PP', FC='inH',FB=['close','randseed','degDisc', 'noSeed'], FinH=['noSeed'], slist=[[0.02, 0.05], [[2,0.5]], [250]])
