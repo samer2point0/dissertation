@@ -116,4 +116,4 @@ def plotExp(gName, xAx,FC='inH', FB=FuncList, FinH=FuncList, slist=SetupList):
         plt.legend(loc='lower right')
         plt.show()
 
-plotExp('gr', 'PP', FC='inH',FB=['close','randseed','degDisc', 'noSeed'], FinH=['noSeed'], slist=[[0.02, 0.05], [[2,0.5]], [250]])
+plotExp('astroph', 'PP', FC='inH')#,FB=['close','randseed','degDisc', 'noSeed'], FinH=['noSeed'], slist=[[0.02, 0.05], [[2,0.5]], [250]])
