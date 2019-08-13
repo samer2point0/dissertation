@@ -93,9 +93,9 @@ def plotExp(gName, xAx,FC='inH', FB=FuncList, FinH=FuncList, slist=SetupList):
     Fconst=FB if FC=='B' else FinH
     Fchang=FinH if FC=='B' else FB
     for s in sslist:
-        fig=plt.figure()
+        fig=plt.figure(figsize=(300,20))
         plt.title(str(s))
-        ax=fig.subplots(len(sslist), 1, squeeze=False)
+        ax=fig.subplots(len(Fconst), 1, squeeze=False)
         for i in range(len(Fconst)):
             for j in range(len(Fchang)):
                 print('runss')
@@ -103,7 +103,7 @@ def plotExp(gName, xAx,FC='inH', FB=FuncList, FinH=FuncList, slist=SetupList):
                 for z in range(len(slist[xi])):
                     stemp=list(s)
                     stemp.insert(xi, slist[xi][z]) #replace with slist if necassary
-                    x.append(slist[xi][z])
+                    x.append(slist[xi][z][0])
 
                     b=i if FC=='B' else j
                     h=j if FC=='B' else i
@@ -116,4 +116,6 @@ def plotExp(gName, xAx,FC='inH', FB=FuncList, FinH=FuncList, slist=SetupList):
         plt.legend(loc='lower right')
         plt.show()
 
-plotExp('gr', 'PP', FC='inH',FB=['close','randseed','degDisc', 'noSeed'], FinH=['noSeed'], slist=[[0.02, 0.05], [[2,0.5]], [250]])
+#plotExp('astroph', 'r', FC='inH', slist=[[0.02], [[2,0.5], [5,0.2]], [250]])
+#matrix('astroph',slist=[[0.02], [[2,0.5], [5,0.2]], [250]])
+#vsMat('astroph',slist=[[0.02], [[2,0.5], [5,0.2]], [250]])
