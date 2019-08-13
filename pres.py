@@ -107,7 +107,7 @@ def plotExp(gName, xAx,FC='inH', FB=FuncList, FinH=FuncList, slist=SetupList):
 
                     b=i if FC=='B' else j
                     h=j if FC=='B' else i
-                    c=str([FB[b], FinH[i], stemp[0], stemp[1], stemp[2]])
+                    c=str([FB[b], FinH[h], stemp[0], stemp[1], stemp[2]])
                     y.append(DF[c].mean())
                     yerr.append(DF[c].std())
                 ax[i,0].errorbar(x, y, yerr=yerr, label=Fchang[j])
@@ -116,6 +116,65 @@ def plotExp(gName, xAx,FC='inH', FB=FuncList, FinH=FuncList, slist=SetupList):
         plt.legend(loc='lower right')
         plt.show()
 
-#plotExp('astroph', 'r', FC='inH', slist=[[0.02], [[2,0.5], [5,0.2]], [250]])
-#matrix('astroph',slist=[[0.02], [[2,0.5], [5,0.2]], [250]])
-#vsMat('astroph',slist=[[0.02], [[2,0.5], [5,0.2]], [250]])
+
+def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
+    DF=pd.read_csv('./tests/'+gName+'_test.txt')
+
+    tempslist=copy.deepcopy(slist)
+    del tempslist[a]
+    sslist=list(itertools.product(*tempslist))
+
+    Fconst=FB if FC=='B' else FinH
+    Fchang=FinH if FC=='B' else FB
+
+    for setup in slist[a]:
+        for i in range(len(Fconst)):
+            size=8
+            fig=plt.figure(figsize=(size,size))
+            assend=numpy.linspace(0, size, size)
+            const=numpy.full((size,0),size)
+
+            colors=['or','ob','og', 'oy', 'oc','>r','>b','>g', '>y']
+            M=[]
+            for j,fch in enumerate(Fchang):
+                L=[]
+                for z,x in enumerate(sslist):
+                    x=list(x)
+                    x.insert(a, setup)
+                    b=i if FC=='B' else j
+                    h=j if FC=='B' else i
+                    c=str([FB[b], FinH[h], x[0], x[1], x[2]])
+                    l=DF[c].tolist()
+                    L.append(l)
+                M.append(L)
+
+            for j,fch in enumerate(Fchang):
+                marker=colors.pop()
+                btheta=-3.1415/8
+                for z,x in enumerate(sslist):
+                    thetaInc=btheta+j*3.1415/len(Fchang)/4
+                    r=M[j][z]
+                    l=len(sslist)
+                    theta=[z*3.1415*2/l+thetaInc]*len(r)
+                    label=fch if z==0 else None
+                    plt.polar(theta, r,marker, ms=8, label=label)
+
+
+
+            plt.title('Graph '+gName +' with seedsize '+str(setup)+ ' and '+ FC+' functin '+ str(Fconst[i]))
+            ax=fig.gca()
+            ticks=[str(sslist[int(x/2)]) if x%2==0 else '' for x in range(8)]
+            d={'fontsize': 12,'fontweight': 'bold'}
+            ax.set_xticklabels(ticks, fontdict=d)
+            plt.legend(loc='lower right')
+            plt.show()
+
+
+
+
+
+flist=['noSeed', 'randseed', 'degree', 'sinDisc', 'degDisc', 'MPG','close','degN', 'voteN']
+#plotExp('astroph', 'r', FC='inH', slist=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]])
+#vsMat('gr',slist=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]], flist=flist)
+#matrix('gr',slist=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]], flist=flist)
+plotAtr('gr',2, slist=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]])
