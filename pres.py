@@ -134,7 +134,7 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
             assend=numpy.linspace(0, size, size)
             const=numpy.full((size,0),size)
 
-            colors=['or','ob','og', 'oy', 'oc','>r','>b','>g', '>y']
+            colors=['>r','>b', '>g','og','oc','oy', 'om', 'or','ob','>y']
             M=[]
             for j,fch in enumerate(Fchang):
                 L=[]
@@ -157,7 +157,8 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
                     l=len(sslist)
                     theta=[z*3.1415*2/l+thetaInc]*len(r)
                     label=fch if z==0 else None
-                    plt.polar(theta, r,marker, ms=8, label=label)
+                    plt.polar(theta, r,marker, ms=6, label=label)
+                    plt.polar([theta.pop()], [sum(r)/len(r)], 'xk', label='Mean')
 
 
 
@@ -175,6 +176,6 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
 
 flist=['noSeed', 'randseed', 'degree', 'sinDisc', 'degDisc', 'MPG','close','degN', 'voteN']
 #plotExp('astroph', 'r', FC='inH', slist=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]])
-#vsMat('gr',slist=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]], flist=flist)
-#matrix('gr',slist=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]], flist=flist)
-plotAtr('gr',2, slist=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]])
+#vsMat('astroph')
+#matrix('astroph')
+plotAtr('astroph',2)
