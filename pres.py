@@ -134,7 +134,7 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
             assend=numpy.linspace(0, size, size)
             const=numpy.full((size,0),size)
 
-            colors=['>r','>b', '>g','og','oc','oy', 'om', 'or','ob','>y']
+            colors=['sienna','lime','g','c','y', 'm', 'r','b','grey']
             M=[]
             for j,fch in enumerate(Fchang):
                 L=[]
@@ -148,22 +148,25 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
                     L.append(l)
                 M.append(L)
 
+            mini,maxi=[],[]
             for j,fch in enumerate(Fchang):
-                marker=colors.pop()
+                c=colors.pop()
                 btheta=-3.1415/8
                 for z,x in enumerate(sslist):
                     thetaInc=btheta+j*3.1415/len(Fchang)/4
                     r=M[j][z]
                     l=len(sslist)
-                    theta=[z*3.1415*2/l+thetaInc]*len(r)
+                    theta=[z*3.1415*2/l+thetaInc+btheta*random.random()/len(Fchang) for x in r]
                     label=fch if z==0 else None
-                    plt.polar(theta, r,marker, ms=6, label=label)
-                    #plt.polar([theta.pop()], [sum(r)/len(r)], 'xk', label='Mean')
+                    plt.polar(theta, r,color=c,marker='o', ls=' ', ms=3, label=label)
+                    plt.polar([3.1415/l+z*3.1415/(l/2)]*2, [0,31000],'-k')
+                    plt.polar([theta.pop()], [sum(r)/len(r)], 'xk')
+                    maxi.append(max(r))
 
-
-
+            maxi=max(maxi)
             plt.title('Graph '+gName +' with seedsize '+str(setup)+ ' and '+ FC+' functin '+ str(Fconst[i]))
             ax=fig.gca()
+            ax.set_rmax( maxi+100)
             ticks=[str(sslist[int(x/2)]) if x%2==0 else '' for x in range(8)]
             d={'fontsize': 12,'fontweight': 'bold'}
             ax.set_xticklabels(ticks, fontdict=d)
@@ -178,4 +181,4 @@ flist=['noSeed', 'randseed', 'degree', 'sinDisc', 'degDisc', 'MPG','close','degN
 #plotExp('astroph', 'r', FC='inH', slist=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]])
 #vsMat('astroph')
 #matrix('astroph')
-#plotAtr('astroph',2)
+plotAtr('astroph', 2,FC='B')
