@@ -10,7 +10,7 @@ import pres
 import tools
 
 
-FuncList=[algor.noSeed, algor.randseed, algor.degree, algor.sinDisc, algor.degDisc, algor.MPG, algor.close, algor.degN, algor.voteN]
+FuncList=[algor.noSeed, algor.randseed, algor.degree, algor.degDisc, algor.MPG,  algor.degN, algor.voteN]
 SetupList=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]]
 
 def test(gName, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=250):
@@ -73,7 +73,7 @@ def replaceAT(gName, a):
         test(gName, save=True, FB=l[0], FinH=l[1], PP=l[2], r=l[3], seedsize=l[4])
         #pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
 
-tfunc('gr')
+tfunc('dblp_snow_smp')
 
 
 #VS
