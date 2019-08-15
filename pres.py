@@ -178,4 +178,5 @@ flist=['noSeed', 'randseed', 'degree', 'sinDisc', 'degDisc', 'MPG','close','degN
 #plotExp('astroph', 'r', FC='inH', slist=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]])
 #vsMat('astroph')
 #matrix('astroph')
-#plotAtr('astroph',2)
+slist=[[0.01, 0.02,0.05], [[2,0.5], [5,0.2]], [250]]
+plotAtr('astroph',2, slist=slist)
