@@ -179,6 +179,6 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
 
 flist=['noSeed', 'randseed', 'degree', 'sinDisc', 'degDisc', 'MPG','close','degN', 'voteN']
 #plotExp('astroph', 'r', FC='inH', slist=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]])
-#vsMat('astroph')
-#matrix('astroph')
-plotAtr('astroph', 2,FC='B')
+vsMat('astroph')
+#matrix('dblp_snow_smp')
+plotAtr('dblp_snow_smp', 2,FC='inH')
