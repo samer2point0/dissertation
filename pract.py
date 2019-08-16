@@ -73,7 +73,7 @@ def replaceAT(gName, a):
         test(gName, save=True, FB=l[0], FinH=l[1], PP=l[2], r=l[3], seedsize=l[4])
         #pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
 
-slist=[[0.01], [[2,0.5], [5,0.2]], [250]]
+slist=[[0.01,0.02,0.05], [[1.25,0.8]], [250]]
 tfunc('astroph', slist=slist)
 
 
