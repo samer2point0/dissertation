@@ -186,8 +186,8 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
 
 
 
-flist=['noSeed', 'randseed', 'degree', 'sinDisc', 'degDisc', 'MPG','close','degN', 'voteN']
+#flist=['noSeed', 'randseed', 'degree', 'sinDisc', 'degDisc', 'MPG','close','degN', 'voteN']
 #plotExp('astroph', 'r', FC='inH', FinH=['noSeed', 'degree'], slist=[[0.01, 0.02,0.05], [[1.25,0.8],[2,0.5],[5,0.2]],[250]])
 #vsMat('astroph')
 #matrix('astroph', slist=slist)
-plotAtr('astroph',2, slist=[[0.01, 0.02, 0.05], [[1.25,0.8],[2,0.5]],[250]])
+#plotAtr('astroph',2, slist=[[0.01, 0.02, 0.05], [[1.25,0.8],[2,0.5]],[250]])
