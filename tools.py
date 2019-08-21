@@ -79,3 +79,10 @@ def delExp(l, gName):
     DF.dropna(axis=0, how='all', inplace=True)
     DF.to_csv('./tests/'+gName+'_test.txt', index=False)
     print(DF)
+
+def merge(gName, ax=0):
+    DF1=pd.read_csv('./tests/'+gName+'_test1.txt')
+    DF2=pd.read_csv('./tests/'+gName+'_test2.txt')
+    DF=pd.concat([DF1,DF2], axis=0, join='outer')
+    print(DF1.shape, DF2.shape, DF.shape)
+    DF.to_csv('./tests/'+gName+'_test.txt', index=False)

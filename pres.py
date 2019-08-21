@@ -67,8 +67,8 @@ def vsMat(gName, flist=FuncList, slist=SetupList):
         for (f1,f2) in fflist:
             c1=str([f1, f2, s[0], s[1], s[2]])
             c2=str([f2, f1, s[0], s[1], s[2]])
-            l1=DF[c1].tolist()
-            l2=DF[c2].tolist()
+            l1=DF[c1].dropna().tolist()
+            l2=DF[c2].dropna().tolist()
 
             t1=[round(x,3) for x in list(stats.ttest_ind(l1, l2))]
             t2=[round(x,3) for x in list(stats.ttest_ind(l2, l1))]
@@ -186,8 +186,9 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
 
 
 
-#flist=['noSeed', 'randseed', 'degree', 'sinDisc', 'degDisc', 'MPG','close','degN', 'voteN']
+#flist=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','close','degN', 'voteN']
+slist=[[0.01, 0.02, 0.05], [[1.25,0.8],[2,0.5], [5, 0.2]],[250]]
 #plotExp('astroph', 'r', FC='inH', FinH=['noSeed', 'degree'], slist=[[0.01, 0.02,0.05], [[1.25,0.8],[2,0.5],[5,0.2]],[250]])
-#vsMat('astroph')
+vsMat('astroph', slist=slist)
 #matrix('astroph', slist=slist)
-#plotAtr('astroph',2, slist=[[0.01, 0.02, 0.05], [[1.25,0.8],[2,0.5]],[250]])
+#plotAtr('astroph',2, FC='B', slist=slist)
