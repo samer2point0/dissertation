@@ -45,7 +45,7 @@ def expinDF(gName, kw):
     else:
         return False
 
-def delAtr(gName, f):
+def delF(gName, f):
     DF=pd.read_csv('./tests/'+gName+'_test.txt')
     L=[]
     for exp in DF.columns:
