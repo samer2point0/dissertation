@@ -35,20 +35,8 @@ def randApart(g, p, seedsize, tSet=None, r=1):
     return seed
 
 def degree(g,p, seedsize, tSet=None, r=1):
-    ln=list(g.nodes)
-    D=dict(g.degree)
-    topD=list(sorted(D, key=lambda x: D[x], reverse=False))
-    seed=set()
-    EI=int(seedsize*p*g.size()/g.number_of_nodes())
-    while True:
-        max=topD.pop()
-        pr=D[max]/g.size()
-        prob=EI*pr*pow((1-pr),(EI-1))
-        if prob < 0.2:
-            break
-
-    seed=set(topD[-seedsize:-1])
-    return seed
+    l=sorted(g.degree, key=lambda x: x[1], reverse=True)
+    return set([x[0] for x in l[0:seedsize]])
 
 
 def sinDisc(g,p,  seedsize, tSet=None, r=1):#minus tSet
