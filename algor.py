@@ -86,45 +86,48 @@ def MPG(g,p, seedsize, tSet=None, r=1):
     N=dict()
     seed=set()
     neigh=set()
-    i=1
     Set=tSet
-    while pow(p,i)>thresh:
+    i=1
+    while i<3:
         for t in Set:#equal wieghts and propagation probal <0.1
             nei=[x for x in g.neighbors(t) if not(x in tSet)]#only works if i<=2 (must delete node resulting in it's influence)
             neigh=neigh.union(set(nei))
             for n in nei:
                 if not n in N.keys():
-                    N[n]={'aProb':0, 'expGain':0, 'weGain':0, 'parents':set()}
+                    N[n]={'aPr':0, 'expG':0, 'weG':0, 'parents':set()}
 
-                N[n]['aProb']=N[n]['aProb']+p
-                if not i==1:
+                if i==1:
+                    #multiplied by (1-ap) because concepts activate once
+                    N[n]['aPr']=N[n]['aPr']+p*(1-N[n]['aPr'])
+                    N[n]['paPr']=N[n]['aPr']
+                elif i==2:
                     N[n]['parents'].add(t)
-        Set=neigh.difference(Set)
+                    N[n]['aPr']=N[n]['aPr']+N[t]['paPr']*p*(1-N[n]['aPr'])
+        Set=neigh
         i=i+1
 
     for n in neigh:
-        N[n]['expGain']=g.degree[n]*p #equal weights
-        N[n]['weGain']=N[n]['aProb']*N[n]['expGain']
+        N[n]['expG']=g.degree[n]*p #equal weights
+        N[n]['weG']=N[n]['aPr']*N[n]['expG']
 
     while True:
-        v=max(N, key=lambda x:N[x]['weGain'])
+        v=max(N, key=lambda x:N[x]['weG'])
         if not (v in tSet):
             seed.add(v)
         if len(seed)==seedsize:
             break
 
         #update expected gain
-        for pa in N[v]['parents']:
-            if not pa in seed and not pa in tSet:
-                N[pa]['expGain']=N[pa]['expGain']-p+r*p
-                N[pa]['weGain']=N[pa]['aProb']*N[pa]['expGain']
-
         #update activation prob
         nei=neigh.intersection(g.neighbors(v))
         for k in nei:
-            if not k in seed and not k in tSet:
-                N[k]['aProb']=N[k]['aProb']-p+p*r
-                N[k]['weGain']=N[k]['aProb']*N[k]['expGain']
+            #only way activation probability is affected is if v is a parent of k
+            if not k in seed:
+                N[k]['expG']=N[k]['expG']-p+r*p
+                if v in N[k]['parents']:
+                    N[k]['aPr']=N[k]['aPr']-N[v]['paPr']*p+r*N[v]['paPr']*p
+
+                N[k]['weG']=N[k]['aPr']*N[k]['expG']
 
         del N[v]
     #print(time.time()-begin)

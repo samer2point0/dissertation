@@ -65,14 +65,13 @@ def replaceEXP(gName, L):
         #pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
 
 def replaceF(gName, a):
-    expList=tools.delAtr(gName, a)
+    expList=tools.delF(gName, a)
     sL=[x.__name__ for x in FuncList]
     for l in expList:
         l[0]=FuncList[sL.index(l[0])]
         l[1]=FuncList[sL.index(l[1])]
         test(gName, save=True, FB=l[0], FinH=l[1], PP=l[2], r=l[3], seedsize=l[4])
         #pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
-
 
 
 tfunc('dblp_mhda_smp')

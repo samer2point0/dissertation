@@ -57,6 +57,7 @@ def delF(gName, f):
     print(DF)
     return L
 
+
 def nsample(gName, n, sampler, size=20000):
     g=readG(gName)
     for i in range(n):
