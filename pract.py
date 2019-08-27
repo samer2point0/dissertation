@@ -74,7 +74,7 @@ def replaceF(gName, a):
         #pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
 
 
-tfunc('dblp_mhda_smp')
+tfunc('dblp_snow_smp')
 
 
 #VS
