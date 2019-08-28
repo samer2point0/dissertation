@@ -20,7 +20,7 @@ def test(gName, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[
         if save and tools.expinDF(gName, kw):
             break #break if expirement already saved
         if 'smp' in gName:  #if network should be sampled
-            n=random.choice(range(50))
+            n=i%50
             g=tools.readG(gName+str(n)) #ex: dplb_snow_smp10
         elif i==0: #if not only read netwokr in first run
             g=tools.readG(gName)

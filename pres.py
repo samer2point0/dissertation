@@ -175,7 +175,7 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
             plt.title('Graph '+gName +' with seedsize '+str(setup)+ ' and '+ FC+' functin '+ str(Fconst[i]))
             ax=fig.gca()
             ax.set_rmax( maxi+100)
-            ticks=[str(sslist[int(x/2)]) for x in range(l)]
+            ticks=[str(sslist[int(x)]) for x in range(l)]
             d={'fontsize': 12,'fontweight': 'bold'}
             ax.set_xticks([(x*3.1415/(l/2)) for x in range(l)])
             ax.set_xticklabels(ticks, fontdict=d)
@@ -187,8 +187,8 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
 
 
 #flist=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','close','degN', 'voteN']
-slist=[[0.01, 0.02, 0.05], [[1.25,0.8],[2,0.5], [5, 0.2]],[250]]
-matrix('astroph', slist=slist)
-vsMat('astroph', slist=slist)
+#slist=[[0.01, 0.02], [[1.25,0.8],[2,0.5], [5, 0.2]],[250]]
+#matrix('dblp_snow_smp')
+#vsMat('dblp_snow_smp')
 #plotExp('astroph', 'r', FC='inH', FinH=['noSeed', 'degree'], slist=[[0.01, 0.02,0.05], [[1.25,0.8],[2,0.5],[5,0.2]],[250]])
-#plotAtr('astroph',2, FC='B', slist=slist)
+#plotAtr('dblp_snow_smp',2 , FC='B')
