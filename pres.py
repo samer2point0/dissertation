@@ -9,7 +9,7 @@ import random
 from scipy import stats
 
 
-FuncList=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','degN', 'voteN']
+FuncList=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','close','degN', 'voteN']
 SetupList=[[0.02,0.05], [[2,0.5], [5,0.2]], [250]]
 
 def drawN(g, sub, col=['#dbb844'],pos=None):
@@ -187,8 +187,8 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
 
 
 #flist=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','close','degN', 'voteN']
-#slist=[[0.01, 0.02], [[1.25,0.8],[2,0.5], [5, 0.2]],[250]]
-#matrix('dblp_snow_smp')
-#vsMat('dblp_snow_smp')
+slist=[[0.01, 0.02,0.05], [[1.25,0.8],[2,0.5], [5, 0.2]],[250]]
+#matrix('astroph', slist=slist)
+#vsMat('astroph', slist=slist)
 #plotExp('astroph', 'r', FC='inH', FinH=['noSeed', 'degree'], slist=[[0.01, 0.02,0.05], [[1.25,0.8],[2,0.5],[5,0.2]],[250]])
-#plotAtr('dblp_snow_smp',2 , FC='B')
+plotAtr('astroph',2 , slist=slist, FC='B')

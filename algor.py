@@ -106,8 +106,9 @@ def MPG(g,p, seedsize, tSet=None, r=1):
         Set=neigh
         i=i+1
 
+    #initiating the eexpected gain of the rechabl eneighborhood
     for n in neigh:
-        N[n]['expG']=g.degree[n]*p #equal weights
+        N[n]['expG']=(g.degree[n]-1)*p #minus 1 because at least 1 neighbor must be already active
         N[n]['weG']=N[n]['aPr']*N[n]['expG']
 
     while True:
@@ -121,11 +122,11 @@ def MPG(g,p, seedsize, tSet=None, r=1):
         #update activation prob
         nei=neigh.intersection(g.neighbors(v))
         for k in nei:
-            #only way activation probability is affected is if v is a parent of k
             if not k in seed:
-                N[k]['expG']=N[k]['expG']-p+r*p
+                N[k]['expG']=N[k]['expG']-p+r*p #should expG of all neighbors be changed?
+                #only way activation probability is affected is if v is a parent of k
                 if v in N[k]['parents']:
-                    N[k]['aPr']=N[k]['aPr']-N[v]['paPr']*p+r*N[v]['paPr']*p
+                    N[k]['aPr']=N[k]['aPr']-N[v]['paPr']*p+r*r*N[v]['paPr']*p #multiply by r^2 , one to update probability of parent recieving influence and one for parnet influencing
 
                 N[k]['weG']=N[k]['aPr']*N[k]['expG']
 
