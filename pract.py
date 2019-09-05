@@ -10,7 +10,7 @@ import pres
 import tools
 
 
-FuncList=[algor.noSeed, algor.randseed, algor.degree, algor.degDisc, algor.MPG, algor.close,  algor.degN, algor.voteN]
+FuncList=[algor.noSeed, algor.randseed, algor.degree, algor.degDisc, algor.MPG, algor.CHD,  algor.degN, algor.voteQ]
 SetupList=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]]
 
 def test(gName, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=250):
@@ -78,5 +78,5 @@ tfunc('astroph', slist=[[0.01, 0.02, 0.05], [[1.25,0.8], [2,0.5], [5,0.2]], [250
 
 
 #VS
-#test('astroph', FB=algor.voteN, FinH=algor.noSeed,PP=0.05, r=[5,0.2], seedsize=500)
+#test('astroph', FB=algor.voteQ, FinH=algor.noSeed,PP=0.05, r=[5,0.2], seedsize=500)
 #test('astroph', FB=algor.degDisc, FinH=algor.degN,PP=0.05, r=[5,0.2], seedsize=250)

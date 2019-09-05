@@ -184,7 +184,7 @@ def degN(g,p, seedsize, tSet=None, r=1):
     return seed
 
 
-def voteN(g,p, seedsize, tSet=None, r=1):
+def voteQ(g,p, seedsize, tSet=None, r=1):
     #begin=time.time()
     ln=list(g.nodes)
     avgd=g.size()/g.number_of_nodes()
@@ -224,7 +224,7 @@ def voteN(g,p, seedsize, tSet=None, r=1):
     #print(time.time()-begin)
     return seed
 
-def close(g,p, seedsize, tSet=None, r=1):
+def CHD(g,p, seedsize, tSet=None, r=1):
     l=dict(g.degree)
     tpot=list(sorted(l, key=lambda x: l[x], reverse=True))[0:int(seedsize*2)]
     pot=set(tpot)

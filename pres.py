@@ -6,11 +6,50 @@ import itertools
 import copy
 import sampling
 import random
+import math
 from scipy import stats
 
 
-FuncList=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','close','degN', 'voteN']
+FuncList=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','CHD','degN', 'voteQ']
 SetupList=[[0.02,0.05], [[2,0.5], [5,0.2]], [250]]
+
+def ttest(gName, exp1, exp2):
+    DF=pd.read_csv('./tests/'+gName+'_test.txt')
+
+    exp1=str(exp1)
+    exp2=str(exp2)
+    l1=DF[exp1].dropna().tolist()
+    l2=DF[exp2].dropna().tolist()
+
+    t=[x for x in list(stats.ttest_ind(l1, l2))]
+    return t[1]
+
+def ttests(gName, F1, F2, slist=SetupList, flist=FuncList):
+    fflist=list(itertools.product(flist, repeat=2))
+    sslist=list(itertools.product(*slist))
+    tL=[]
+    expL=[]
+    for s in sslist:
+        for ffpair in fflist:
+            exp1=[ffpair[0], ffpair[1], s[0], s[1], s[2]]
+            if not exp1 in expL:
+                if F1 in ffpair:
+                    exp2=copy.deepcopy(exp1)
+                    exp2=[F2 if x == F1 else x for x in exp2]
+                if F2 in ffpair:
+                    exp2=copy.deepcopy(exp1)
+                    exp2=[F1 if x == F2 else x for x in exp2]
+                if (F1 in ffpair or F2 in ffpair):
+                    print(exp1)
+                    print(exp2)
+                    print(ttest(gName, exp1, exp2))
+                    expL.extend([exp1,exp2])
+                    tL.append(ttest(gName, exp1, exp2))
+    s=0
+    for p in tL:
+        if p>0.05:
+            s=s+1
+    print(len(tL),s)
 
 def drawN(g, sub, col=['#dbb844'],pos=None):
     #takes graph, list of sub node lists, and list of colors
@@ -94,7 +133,6 @@ def plotExp(gName, xAx,FC='inH', FB=FuncList, FinH=FuncList, slist=SetupList):
     Fchang=FinH if FC=='B' else FB
     for s in sslist:
         fig=plt.figure(figsize=(300,20))
-        plt.title(str(s))
         fig.gca().set_xticks([])
         fig.gca().set_yticks([])
         ax=fig.subplots(len(Fconst), 1, squeeze=False)
@@ -108,18 +146,18 @@ def plotExp(gName, xAx,FC='inH', FB=FuncList, FinH=FuncList, slist=SetupList):
                     xtemp=slist[xi][z] if xAx=='PP' else slist[xi][z][0]
                     x.append(xtemp)
 
+
                     b=i if FC=='B' else j
                     h=j if FC=='B' else i
                     c=str([FB[b], FinH[h], stemp[0], stemp[1], stemp[2]])
                     y.append(DF[c].mean())
                     yerr.append(DF[c].std())
-                ax[i,0].errorbar(x, y, yerr=yerr, label=Fchang[j], linewidth=3)
+                ax[i,0].errorbar(x, y, yerr=yerr,  label=Fchang[j], linewidth=3)
             maxX, maxS=max(x), max(y)+max(yerr)
             minX, minS=min(x), min(y)+max(yerr)
-            ax[i,0].set_xticks([minX+z/10*maxX for z in range(10)])
-            ax[i,0].set_yticks([minS+z/10*maxS for z in range(10)])
-            ax[i,0].set_xlabel(Fconst[i]+ ' is '+ FC)
-
+            ax[i,0].title.set_text('Competing against '+FB[b])
+            ax[i,0].set_ylabel('Mean target counts')
+        ax[i,0].set_xlabel('Influence ratio of boosting concept r(T,B)')
 
         plt.legend(loc='lower right')
         plt.show()
@@ -182,13 +220,31 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
             plt.legend(loc='lower right')
             plt.show()
 
+def hist(gName, Exps):
+    DF=pd.read_csv('./tests/'+gName+'_test.txt')
+
+    fig=plt.figure()
+    labels=['PP=0.01 & r(T,B)=1.25', 'PP=0.05 & r(T,B)=1.25', 'PP=0.05 & r(T,B)=5']
+    i=0
+    for x in Exps:
+        exp=str(x)
+        l=stats.zscore(DF[exp].dropna().tolist())
+        plt.hist(l, bins=6, histtype='step',  label=labels[i])
+        i=i+1
+
+    ax=fig.gca()
+    ax.set_xlabel('Z-scores of the target counts')
+    ax.set_ylabel('Frequency')
+    plt.title('Normalised histogram of random boosting seed set')
+    plt.legend(loc='upper left')
+    plt.show()
 
 
 
-
-#flist=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','close','degN', 'voteN']
+#flist=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','CHD','degN', 'voteQ']
 slist=[[0.01, 0.02,0.05], [[1.25,0.8],[2,0.5], [5, 0.2]],[250]]
 #matrix('astroph', slist=slist)
 #vsMat('astroph', slist=slist)
-#plotExp('astroph', 'r', FC='inH', FinH=['noSeed', 'degree'], slist=[[0.01, 0.02,0.05], [[1.25,0.8],[2,0.5],[5,0.2]],[250]])
-plotAtr('astroph',2 , slist=slist, FC='B')
+plotExp('astroph', 'r', FC='B', FB=['randseed','CHD', 'MPG'], slist=slist)
+#plotAtr('astroph',2 , slist=slist, FC='B')
+#ttests('astroph', 'voteQ', 'degDisc', flist=['MPG', 'CHD', 'voteQ', 'degDisc'])#, slist=[[0.01,0.02,0.05], [[1.25,0.8]], [250]])
