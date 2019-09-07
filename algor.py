@@ -38,6 +38,18 @@ def degree(g,p, seedsize, tSet=None, r=1):
     l=sorted(g.degree, key=lambda x: x[1], reverse=True)
     return set([x[0] for x in l[0:seedsize]])
 
+def cutDeg(g,p, seedsize, tSet=None, r=1):
+    l=dict(g.degree)
+    topD=list(sorted(l, key=lambda x: l[x], reverse=False))
+    EI=int(seedsize*p*g.size()/g.number_of_nodes())
+    while True:
+        m=topD.pop()
+        pr=l[m]/g.size()
+        prob=EI*pr*pow((1-pr),(EI-1))
+        if prob < 0.2:
+            break
+
+    return set(topD[-seedsize:-1])
 
 def sinDisc(g,p,  seedsize, tSet=None, r=1):#minus tSet
     l=dict(g.degree)
@@ -78,7 +90,6 @@ def degDisc(g,p, seedsize, tSet=None, r=1):#minus tSet
 
         del l[v]
     return seed
-
 
 def MPG(g,p, seedsize, tSet=None, r=1):
     #begin=time.time()

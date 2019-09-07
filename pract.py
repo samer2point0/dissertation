@@ -16,7 +16,7 @@ SetupList=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]]
 def test(gName, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=250):
     l=[]
     kw={'FB':FB.__name__, 'FinH':FinH.__name__, 'PP':PP, 'r':r, 'seedsize':seedsize}
-    for i in range(0,50):
+    for i in range(0,100):
         if save and tools.expinDF(gName, kw):
             break #break if expirement already saved
         if 'smp' in gName:  #if network should be sampled
@@ -74,9 +74,9 @@ def replaceF(gName, a):
         #pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
 
 
-tfunc('astroph', slist=[[0.01, 0.02, 0.05], [[1.25,0.8], [2,0.5], [5,0.2]], [250]])
+#tfunc('dblp_mhda_smp',flist=[algor.randseed,algor.noSeed] ,slist=[[0.02], [[2,0.5]], [250]])
 
 
-#VS
-#test('astroph', FB=algor.voteQ, FinH=algor.noSeed,PP=0.05, r=[5,0.2], seedsize=500)
+test('astroph', FB=algor.cutDeg, FinH=algor.noSeed,PP=0.05, r=[5,0.2], seedsize=250)
+test('astroph', FB=algor.degree, FinH=algor.noSeed,PP=0.05, r=[5,0.2], seedsize=250)
 #test('astroph', FB=algor.degDisc, FinH=algor.degN,PP=0.05, r=[5,0.2], seedsize=250)

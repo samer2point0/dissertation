@@ -24,30 +24,32 @@ def ttest(gName, exp1, exp2):
     t=[x for x in list(stats.ttest_ind(l1, l2))]
     return t[1]
 
-def ttests(gName, F1, F2, slist=SetupList, flist=FuncList):
+def ttests(gName, Fex, slist=SetupList, flist=FuncList):
     fflist=list(itertools.product(flist, repeat=2))
     sslist=list(itertools.product(*slist))
     tL=[]
-    expL=[]
-    for s in sslist:
-        for ffpair in fflist:
-            exp1=[ffpair[0], ffpair[1], s[0], s[1], s[2]]
-            if not exp1 in expL:
-                if F1 in ffpair:
-                    exp2=copy.deepcopy(exp1)
-                    exp2=[F2 if x == F1 else x for x in exp2]
-                if F2 in ffpair:
-                    exp2=copy.deepcopy(exp1)
-                    exp2=[F1 if x == F2 else x for x in exp2]
-                if (F1 in ffpair or F2 in ffpair):
-                    print(exp1)
-                    print(exp2)
-                    print(ttest(gName, exp1, exp2))
-                    expL.extend([exp1,exp2])
-                    tL.append(ttest(gName, exp1, exp2))
+    ffex=[x for x in itertools.product(Fex, repeat=2) if x[0]!=x[1]]
+    for ff in ffex:
+        expL=[]
+        for s in sslist:
+            for ffpair in fflist:
+                exp1=[ffpair[0], ffpair[1], s[0], s[1], s[2]]
+                if not exp1 in expL:
+                    if ff[0] in ffpair:
+                        exp2=copy.deepcopy(exp1)
+                        exp2=[ff[1] if x == ff[0] else x for x in exp2]
+                    if ff[1] in ffpair:
+                        exp2=copy.deepcopy(exp1)
+                        exp2=[ff[0] if x == ff[1] else x for x in exp2]
+                    if (ff[0] in ffpair or ff[1] in ffpair):
+                        #print(exp1)
+                        #print(exp2)
+                        #print(ttest(gName, exp1, exp2))
+                        expL.extend([exp1,exp2])
+                        tL.append(ttest(gName, exp1, exp2))
     s=0
     for p in tL:
-        if p>0.05:
+        if p>=0.05:
             s=s+1
     print(len(tL),s)
 
@@ -101,6 +103,8 @@ def vsMat(gName, flist=FuncList, slist=SetupList):
     fflist=list(itertools.product(flist, repeat=2))
     sslist=list(itertools.product(*slist))
     i=0
+    d=0
+    W=dict(zip(flist,[0]*len(flist)))
     for s in sslist:
         tDF=pd.DataFrame(numpy.zeros((len(flist),len(flist))), columns=flist, index=flist)
         for (f1,f2) in fflist:
@@ -109,18 +113,19 @@ def vsMat(gName, flist=FuncList, slist=SetupList):
             l1=DF[c1].dropna().tolist()
             l2=DF[c2].dropna().tolist()
 
-            t1=[round(x,3) for x in list(stats.ttest_ind(l1, l2))]
-            t2=[round(x,3) for x in list(stats.ttest_ind(l2, l1))]
-            tDF[f1].loc[f2]=str(t1)
-            tDF[f1].loc[f2]=str(t2)
+            t=[round(x,3) for x in list(stats.ttest_ind(l1, l2))]
+            tDF[f1].loc[f2]=str(t)
+            if t[1]<0.05 and t[0]>0:
+                W[f1]=W[f1]+1
 
         print('\n\nBellow are the VS t-tests for the set up \n',sslist[i])
         print(tDF)
         L.append(DF)
         i=i+1
 
-    return L ,sslist
+    print(W)
 
+    return L ,sslist
 
 def plotExp(gName, xAx,FC='inH', FB=FuncList, FinH=FuncList, slist=SetupList):
     xi = 0 if xAx=='PP' else 1 #seedsize Excluded
@@ -155,13 +160,12 @@ def plotExp(gName, xAx,FC='inH', FB=FuncList, FinH=FuncList, slist=SetupList):
                 ax[i,0].errorbar(x, y, yerr=yerr,  label=Fchang[j], linewidth=3)
             maxX, maxS=max(x), max(y)+max(yerr)
             minX, minS=min(x), min(y)+max(yerr)
-            ax[i,0].title.set_text('Competing against '+FB[b])
+            ax[i,0].title.set_text('Competing against '+FinH[h])
             ax[i,0].set_ylabel('Mean target counts')
         ax[i,0].set_xlabel('Influence ratio of boosting concept r(T,B)')
 
         plt.legend(loc='lower right')
         plt.show()
-
 
 def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
     DF=pd.read_csv('./tests/'+gName+'_test.txt')
@@ -229,22 +233,27 @@ def hist(gName, Exps):
     for x in Exps:
         exp=str(x)
         l=stats.zscore(DF[exp].dropna().tolist())
-        plt.hist(l, bins=6, histtype='step',  label=labels[i])
+        plt.hist(l, bins=6, histtype='step',  label=exp)
         i=i+1
 
     ax=fig.gca()
     ax.set_xlabel('Z-scores of the target counts')
     ax.set_ylabel('Frequency')
     plt.title('Normalised histogram of random boosting seed set')
-    plt.legend(loc='upper left')
+    plt.legend(loc='upper right')
     plt.show()
 
 
 
 #flist=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','CHD','degN', 'voteQ']
 slist=[[0.01, 0.02,0.05], [[1.25,0.8],[2,0.5], [5, 0.2]],[250]]
-#matrix('astroph', slist=slist)
-#vsMat('astroph', slist=slist)
-plotExp('astroph', 'r', FC='B', FB=['randseed','CHD', 'MPG'], slist=slist)
+matrix('astroph')
+#vsMat('dblp_mhda_smp')
+#plotExp('astroph', 'PP', FC='inH',FB=['cutdeg','degree'], FinH=['degN'])
 #plotAtr('astroph',2 , slist=slist, FC='B')
-#ttests('astroph', 'voteQ', 'degDisc', flist=['MPG', 'CHD', 'voteQ', 'degDisc'])#, slist=[[0.01,0.02,0.05], [[1.25,0.8]], [250]])
+#x=ttest('dblp_mhda_smp', ['MPG', 'voteQ',0.02, [2,0.5], 250],['CHD', 'voteQ',0.02, [2,0.5], 250])
+#print(x)
+#ttests('dblp_mhda_smp', ['CHD', 'MPG'], slist=[[ 0.02], [[2,0.5], [5, 0.2]],[250]])
+#hist('astroph', [ ['randseed', 'randseed',0.01, [1.25,0.8], 250],['randseed', 'randseed',0.05, [1.25,0.8], 250],['randseed', 'randseed',0.01, [5,0.2], 250]])
+#hist('dblp_snow_smp', [ ['randseed', 'randseed',0.02, [2,0.5], 250],['randseed', 'randseed',0.05, [2,0.5], 250],['randseed', 'randseed',0.02, [5,0.2], 250]])
+#hist('dblp_mhda_smp', [ ['randseed', 'randseed',0.02, [2,0.5], 250],['randseed', 'randseed',0.05, [2,0.5], 250],['randseed', 'randseed',0.02, [5,0.2], 250]])
