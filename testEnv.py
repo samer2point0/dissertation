@@ -13,19 +13,26 @@ import tools
 FuncList=[algor.noSeed, algor.randseed, algor.degree, algor.degDisc, algor.MPG, algor.CHD,  algor.degN, algor.voteQ]
 SetupList=[[0.02, 0.05], [[2,0.5], [5,0.2]], [250]]
 
-def test(gName, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=250):
+def test(gName, save=False, FB=algor.randseed, FinH=algor.randseed, PP=0.05, r=[2,0.5], seedsize=250, n_run=100):
     l=[]
     kw={'FB':FB.__name__, 'FinH':FinH.__name__, 'PP':PP, 'r':r, 'seedsize':seedsize}
-    for i in range(0,100):
+    for i in range(0,n_run):
         if save and tools.expinDF(gName, kw):
             break #break if expirement already saved
         if 'smp' in gName:  #if network should be sampled
             n=i%50
-            g=tools.readG(gName+str(n)) #ex: dplb_snow_smp10
+            try:
+                g=tools.readG(gName+str(n)) #ex: dplb_snow_smp10
+            except IOError:
+                print('no samples found, wait unitl we create some from the dblp graph')
+                tools.nsample('dblp', 50, sampling.snow, size=31000)
+                tools.nsample('dblp', 50, sampling.mhda, size=31000
+                g=tools.readG(gName+str(n))
+
         elif i==0: #if not only read netwokr in first run
             g=tools.readG(gName)
 
-        T=concept.Concept(g, 'target', PP=PP, r=r, seedsize=seedsize)
+        T=concept.Concept(g, 'target', func=algor.randseed, PP=PP, r=r, seedsize=seedsize)
         tSet=copy.deepcopy(T.seed)
         B=concept.Concept(g, 'B', func=FB, PP=PP, r=r, seedsize=seedsize, tSet=tSet)
         inH=concept.Concept(g, 'inH', func=FinH, PP=PP, r=r, seedsize=seedsize, tSet=tSet)
@@ -74,9 +81,4 @@ def replaceF(gName, a):
         #pres.matrix(gName, slist=[[l[2]],[l[3]], [l[4]]])
 
 
-#tfunc('dblp_mhda_smp',flist=[algor.randseed,algor.noSeed] ,slist=[[0.02], [[2,0.5]], [250]])
-
-
-test('astroph', FB=algor.cutDeg, FinH=algor.noSeed,PP=0.05, r=[5,0.2], seedsize=250)
-test('astroph', FB=algor.degree, FinH=algor.noSeed,PP=0.05, r=[5,0.2], seedsize=250)
-#test('astroph', FB=algor.degDisc, FinH=algor.degN,PP=0.05, r=[5,0.2], seedsize=250)
+tfunc('astroph',flist=[algor.randseed] ,slist=[[0.02], [[2,0.5]], [250]])

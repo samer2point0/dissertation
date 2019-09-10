@@ -7,22 +7,13 @@ import copy
 import sampling
 import random
 import math
-from scipy import stats
+import tools
+
 
 
 FuncList=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','CHD','degN', 'voteQ']
 SetupList=[[0.02,0.05], [[2,0.5], [5,0.2]], [250]]
 
-def ttest(gName, exp1, exp2):
-    DF=pd.read_csv('./tests/'+gName+'_test.txt')
-
-    exp1=str(exp1)
-    exp2=str(exp2)
-    l1=DF[exp1].dropna().tolist()
-    l2=DF[exp2].dropna().tolist()
-
-    t=[x for x in list(stats.ttest_ind(l1, l2))]
-    return t[1]
 
 def ttests(gName, Fex, slist=SetupList, flist=FuncList):
     fflist=list(itertools.product(flist, repeat=2))
@@ -46,7 +37,7 @@ def ttests(gName, Fex, slist=SetupList, flist=FuncList):
                         #print(exp2)
                         #print(ttest(gName, exp1, exp2))
                         expL.extend([exp1,exp2])
-                        tL.append(ttest(gName, exp1, exp2))
+                        tL.append(algor.ttest(gName, exp1, exp2))
     s=0
     for p in tL:
         if p>=0.05:
@@ -226,20 +217,19 @@ def plotAtr(gName, a, FC='inH',slist=SetupList, FB=FuncList, FinH=FuncList):
 
 def hist(gName, Exps):
     DF=pd.read_csv('./tests/'+gName+'_test.txt')
-
-    fig=plt.figure()
     labels=['PP=0.01 & r(T,B)=1.25', 'PP=0.05 & r(T,B)=1.25', 'PP=0.05 & r(T,B)=5']
     i=0
+    fig=plt.figure()
     for x in Exps:
         exp=str(x)
         l=stats.zscore(DF[exp].dropna().tolist())
-        plt.hist(l, bins=6, histtype='step',  label=exp)
+        plt.hist(l, bins=10, histtype='step',  label=gName+exp)
         i=i+1
 
     ax=fig.gca()
     ax.set_xlabel('Z-scores of the target counts')
     ax.set_ylabel('Frequency')
-    plt.title('Normalised histogram of random boosting seed set')
+    plt.title('Histogram of random B seed set')
     plt.legend(loc='upper right')
     plt.show()
 
@@ -247,13 +237,10 @@ def hist(gName, Exps):
 
 #flist=['noSeed', 'randseed', 'degree', 'degDisc', 'MPG','CHD','degN', 'voteQ']
 slist=[[0.01, 0.02,0.05], [[1.25,0.8],[2,0.5], [5, 0.2]],[250]]
-matrix('astroph')
-#vsMat('dblp_mhda_smp')
+#matrix('astroph')
+vsMat('dblp_mhda_smp')
 #plotExp('astroph', 'PP', FC='inH',FB=['cutdeg','degree'], FinH=['degN'])
 #plotAtr('astroph',2 , slist=slist, FC='B')
 #x=ttest('dblp_mhda_smp', ['MPG', 'voteQ',0.02, [2,0.5], 250],['CHD', 'voteQ',0.02, [2,0.5], 250])
 #print(x)
 #ttests('dblp_mhda_smp', ['CHD', 'MPG'], slist=[[ 0.02], [[2,0.5], [5, 0.2]],[250]])
-#hist('astroph', [ ['randseed', 'randseed',0.01, [1.25,0.8], 250],['randseed', 'randseed',0.05, [1.25,0.8], 250],['randseed', 'randseed',0.01, [5,0.2], 250]])
-#hist('dblp_snow_smp', [ ['randseed', 'randseed',0.02, [2,0.5], 250],['randseed', 'randseed',0.05, [2,0.5], 250],['randseed', 'randseed',0.02, [5,0.2], 250]])
-#hist('dblp_mhda_smp', [ ['randseed', 'randseed',0.02, [2,0.5], 250],['randseed', 'randseed',0.05, [2,0.5], 250],['randseed', 'randseed',0.02, [5,0.2], 250]])

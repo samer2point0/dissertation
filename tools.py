@@ -1,12 +1,12 @@
 import networkx as nx
-import sampling
-import concept
-import algor
 import numpy
 import copy
 import pandas as pd
 import itertools
 import random
+import time
+import algor
+from scipy import stats
 
 
 def readG(fname):
@@ -81,9 +81,29 @@ def delExp(l, gName):
     DF.to_csv('./tests/'+gName+'_test.txt', index=False)
     print(DF)
 
-def merge(gName, ax=0):
-    DF1=pd.read_csv('./tests/'+gName+'_test1.txt')
-    DF2=pd.read_csv('./tests/'+gName+'_test2.txt')
-    DF=pd.concat([DF1,DF2], axis=0, join='outer')
-    print(DF1.shape, DF2.shape, DF.shape)
-    DF.to_csv('./tests/'+gName+'_test.txt', index=False)
+def ttest(gName, exp1, exp2):
+    DF=pd.read_csv('./tests/'+gName+'_test.txt')
+
+    exp1=str(exp1)
+    exp2=str(exp2)
+    l1=DF[exp1].dropna().tolist()
+    l2=DF[exp2].dropna().tolist()
+
+    t=[x for x in list(stats.ttest_ind(l1, l2))]
+    return t[1]
+
+
+def timeAlg(gName, alg):
+    G=readG(gName)
+    l=[]
+    for i in range(10):
+        tSet=algor.randseed(G, 0.02,250)
+        begin=time.time()
+        #alg(G, 0.02,250, tSet=tSet, r=5)
+        nx.voterank(G, number_of_nodes=250)
+        l.append(time.time()-begin)
+
+    l=numpy.array(l)
+    print('mean time is  ', numpy.average(l), ' std is ', numpy.std(l))
+
+timeAlg('gr', algor.randseed)

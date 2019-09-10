@@ -2,41 +2,20 @@ import networkx as nx
 import random
 import copy
 import queue
-import sampling
-import time
 
 #import pres
 
 def randseed(g, p, seedsize, tSet=None, r=1):
     nodes=list(g.nodes)
-    seed= set(random.choices(nodes,k=seedsize))
+    seed= set()
     while len(seed)<seedsize:
         seed.add(random.choice(nodes))
     return seed
 
-def randApart(g, p, seedsize, tSet=None, r=1):
-    ln=list(g.nodes)
-    D=dict(g.degree)
-    topD=list(sorted(D, key=lambda x: D[x], reverse=False))
-    seed=set()
-    EI=int(seedsize*p*g.size()/g.number_of_nodes())
-    while True:
-        max=topD.pop()
-        pr=D[max]/g.size()
-        prob=EI*pr*pow((1-pr),(EI-1))
-        if prob < 0.2:
-            break
-
-
-    while len(seed)<seedsize:
-        sel=random.choice(ln)
-        if not sel in seed and sel in topD:
-            seed.add(sel)
-    return seed
-
 def degree(g,p, seedsize, tSet=None, r=1):
     l=sorted(g.degree, key=lambda x: x[1], reverse=True)
-    return set([x[0] for x in l[0:seedsize]])
+    seed=set([x[0] for x in l[0:seedsize]])
+    return seed
 
 def cutDeg(g,p, seedsize, tSet=None, r=1):
     l=dict(g.degree)
@@ -49,7 +28,8 @@ def cutDeg(g,p, seedsize, tSet=None, r=1):
         if prob < 0.2:
             break
 
-    return set(topD[-seedsize:-1])
+    seed=set(topD[-seedsize:-1])
+    return seed
 
 def sinDisc(g,p,  seedsize, tSet=None, r=1):#minus tSet
     l=dict(g.degree)
@@ -92,7 +72,6 @@ def degDisc(g,p, seedsize, tSet=None, r=1):#minus tSet
     return seed
 
 def MPG(g,p, seedsize, tSet=None, r=1):
-    #begin=time.time()
     thresh=0.001
     N=dict()
     seed=set()
@@ -142,7 +121,6 @@ def MPG(g,p, seedsize, tSet=None, r=1):
                 N[k]['weG']=N[k]['aPr']*N[k]['expG']
 
         del N[v]
-    #print(time.time()-begin)
     return seed
 
 
